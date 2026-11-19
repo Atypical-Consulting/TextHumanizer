@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>text-humanizer: AI text, rewritten to read human</title>
+<meta name="description" content="A Claude Code skill and plugin that rewrites AI-written text so it reads like a person wrote it, in French and English, and measures the before and after.">
+<meta property="og:title" content="text-humanizer">
+<meta property="og:description" content="Watch an AI-written post rewrite itself, with the real output of the skill and the real scores.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23FBFAF7'/><path d='M6 17h20' stroke='%23B8241B' stroke-width='3'/><path d='M7 11h12M7 23h15' stroke='%231A191D' stroke-width='2'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  :root {
+    --sc-canvas:     #E9E7E1;
+    --sc-surface:    #FBFAF7;
+    --sc-ink:        #1A191D;
+    --sc-ink-soft:   #55525A;
+    --sc-accent:     #B8241B;
+    --sc-accent-ink: #FFFFFF;
+    --sc-font-display: "Source Serif 4", Georgia, serif;
+    --sc-font-text:    "Source Serif 4", Georgia, serif;
+    --sc-font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+    --sc-shadow-color: 40 8% 30%;
+    --r: 4px;
+    --bar-h: 44px;
+  }
+  body { padding-bottom: var(--bar-h); }
+  h1, h2, h3 { font-family: var(--sc-font-display); font-weight: 600; letter-spacing: var(--sc-track-snug); margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .mono { font-family: var(--sc-font-mono); }
+  .label { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); letter-spacing: 0.02em; color: var(--sc-ink-soft); }
+  .tag { font-family: var(--sc-font-mono); font-size: 0.72rem; color: var(--sc-ink-soft); white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 0; }
+  .skip:focus { left: 1rem; top: 1rem; z-index: 99; background: var(--sc-surface); padding: 0.5rem 0.75rem; }
+  .sheet-paper { background: var(--sc-surface); border-radius: var(--r); box-shadow: var(--sc-e2), inset 0 1px 0 #fff; }
+
+  /* ------------------------------------------------------------ status bar */
+  .status {
+    position: fixed; inset: auto 0 0 0; height: var(--bar-h); z-index: var(--sc-z-chrome);
+    display: flex; align-items: center; gap: var(--sc-5); padding-inline: var(--sc-gutter);
+    background: var(--sc-ink); color: #EDEBE6;
+    font-family: var(--sc-font-mono); font-size: 0.8rem;
+  }
+  .status a { color: inherit; text-decoration: none; }
+  .status__mark { font-weight: 500; white-space: nowrap; }
+  .status__steps { display: flex; gap: var(--sc-4); list-style: none; margin: 0; padding: 0; color: #A9A6AE; }
+  .status__steps a { padding: 0.35rem 0.1rem; border-bottom: 1px solid transparent; transition: color 160ms var(--sc-ease-out), border-color 160ms var(--sc-ease-out); }
+  .status__steps a[aria-current="true"] { color: #fff; border-bottom-color: #E2574C; }
+  .status__score { margin-left: auto; color: #A9A6AE; }
+  .status__score b { color: #fff; font-weight: 500; }
+  .status__cta { background: var(--sc-accent); color: #fff !important; padding: 0.4rem 0.8rem; border-radius: var(--r); white-space: nowrap; transition: transform 120ms var(--sc-ease-out), background-color 160ms var(--sc-ease-out); }
+  .status__cta:active { transform: translateY(1px); }
+  @media (hover: hover) and (pointer: fine) {
+    .status__steps a:hover { color: #fff; }
+    .status__cta:hover { background: #9E1D15; }
+  }
+  .status :focus-visible { outline-color: #F08A80; }
+
+  /* ------------------------------------------------------------------ hero */
+  .hero { min-height: calc(100svh - var(--bar-h)); padding: clamp(1.5rem, 5vh, 3.5rem) var(--sc-gutter) var(--sc-6); display: grid; grid-template-rows: auto 1fr; gap: clamp(1.25rem, 4vh, 2.75rem); max-width: var(--sc-maxw); margin-inline: auto; }
+  .hero__bar { display: flex; align-items: baseline; gap: var(--sc-5); flex-wrap: wrap; border-bottom: 1px solid var(--sc-hairline-strong); padding-bottom: var(--sc-4); }
+  .hero__title { font-family: var(--sc-font-mono); font-weight: 500; font-size: var(--sc-t-xl); letter-spacing: -0.02em; }
+  .hero__sub { font-size: var(--sc-t-lg); line-height: 1.35; max-width: 46ch; color: var(--sc-ink); }
+  .hero__desk { position: relative; display: grid; grid-template-columns: minmax(0, 38rem) minmax(0, 22rem); gap: 0; align-items: start; justify-content: start; }
+  .feed { padding: var(--sc-5) var(--sc-6) var(--sc-5); position: relative; }
+  .feed__meta { margin-bottom: var(--sc-4); }
+  .feed__body { font-size: 1.04rem; line-height: 1.55; max-height: min(25.5em, calc(100svh - 17rem)); overflow: hidden;
+    -webkit-mask-image: linear-gradient(#000 72%, transparent); mask-image: linear-gradient(#000 72%, transparent); }
+  .feed__body p + p { margin-top: 0.8em; }
+  .feed__more { display: inline-block; margin-top: var(--sc-2); font-family: var(--sc-font-mono); font-size: 0.85rem; color: var(--sc-ink-soft); }
+  .scan { margin: 3.2rem 0 0 -1.6rem; padding: var(--sc-5); border-top: 3px solid var(--sc-accent); rotate: -1.2deg; box-shadow: var(--sc-e3); z-index: 2; position: relative; }
+  .scan__score { font-family: var(--sc-font-mono); font-size: 3.4rem; line-height: 1; letter-spacing: -0.04em; margin: var(--sc-3) 0 var(--sc-4); color: var(--sc-accent); }
+  .scan__score small { font-size: 1.1rem; color: var(--sc-ink-soft); letter-spacing: 0; }
+  .readings { display: grid; grid-template-columns: 1fr auto; gap: 0.3rem 1rem; margin: 0; font-family: var(--sc-font-mono); font-size: 0.8rem; }
+  .readings dt { color: var(--sc-ink-soft); }
+  .readings dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .readings .bad { color: var(--sc-accent); }
+  .scan__foot { margin-top: var(--sc-4); font-size: 0.86rem; line-height: 1.45; color: var(--sc-ink-soft); }
+
+  /* -------------------------------------------------------------- the drawer */
+  .drawer { display: flex; align-items: center; background: var(--sc-canvas); }
+  .rail { gap: var(--sc-5); padding-inline: var(--sc-gutter); align-items: stretch; padding-bottom: var(--bar-h); }
+  .rail > * { flex: 0 0 auto; }
+  .rail__lead { width: min(24rem, 80vw); align-self: center; }
+  .rail__lead h2 { font-size: var(--sc-t-2xl); line-height: 1.05; }
+  .rail__lead p { margin-top: var(--sc-4); color: var(--sc-ink-soft); max-width: 34ch; }
+  .slip { width: min(21rem, 78vw); padding: var(--sc-5); background: var(--sc-surface); border-radius: var(--r); box-shadow: var(--sc-e1), inset 0 1px 0 #fff; }
+  .slip h3 { font-size: var(--sc-t-lg); margin-bottom: var(--sc-4); padding-bottom: var(--sc-3); border-bottom: 1px solid var(--sc-hairline); }
+  .slip ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-4); }
+  .slip q { display: block; quotes: none; font-size: 0.98rem; line-height: 1.42; text-decoration: underline wavy var(--sc-accent); text-decoration-thickness: 1px; text-underline-offset: 0.24em; text-decoration-skip-ink: none; }
+  .slip .tag { display: block; margin-top: 0.3rem; }
+  .rail__end { width: min(22rem, 80vw); align-self: center; font-size: var(--sc-t-lg); line-height: 1.4; }
+  .rail__end p + p { margin-top: var(--sc-4); color: var(--sc-accent); }
+  @media (prefers-reduced-motion: no-preference) {
+    .slip { opacity: clamp(0.55, calc(var(--sc-p, 0) * 9 - var(--k, 0) * 1.1 + 1.6), 1); }
+  }
+
+  /* --------------------------------------------------------------- silence */
+  .hush { height: 70svh; display: grid; place-items: center; background: var(--sc-surface); }
+  .hush p { font-family: var(--sc-font-mono); font-size: 0.85rem; color: var(--sc-ink-soft); }
+  .hush p::after { content: ""; display: inline-block; width: 0.55em; height: 1.05em; margin-left: 0.25em; vertical-align: -0.15em; background: var(--sc-accent); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .hush p::after { animation: none; } }
+
+  /* ------------------------------------------------------------- the desk */
+  .desk__stage { background: var(--sc-canvas); display: grid; grid-template-columns: minmax(0, 42rem) minmax(0, 21rem); gap: clamp(1.5rem, 4vw, 4rem); justify-content: center; align-items: start; padding: clamp(1rem, 4vh, 2.5rem) var(--sc-gutter) calc(var(--bar-h) + 1rem); }
+  .sheet { padding: var(--sc-5) var(--sc-6) var(--sc-6); }
+  .sheet__head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: var(--sc-4); padding-bottom: var(--sc-3); border-bottom: 1px solid var(--sc-hairline); }
+  .galley { font-size: clamp(0.95rem, 0.6rem + 0.62vh, 1.08rem); line-height: 1.5; }
+  .u + .u { margin-top: 0.72em; }
+  .u--bullet:not(.is-done) + .u--bullet:not(.is-done) { margin-top: 0.1em; }
+  .u__a { display: none; }
+  .u.is-done .u__b { display: none; }
+  .u.is-done .u__a { display: block; }
+  .u.is-done.u--cut { display: none; }
+  .u.is-new .u__a { animation: set-in 420ms var(--sc-ease-out) both; }
+  @keyframes set-in { from { opacity: 0; transform: translateY(5px); } }
+  .u__ink {
+    background-image: linear-gradient(var(--sc-accent), var(--sc-accent));
+    background-repeat: no-repeat; background-position: 0 60%;
+    background-size: calc(var(--s, 0) * 100%) 2px;
+  }
+  .u.is-cur .u__b { color: color-mix(in oklab, var(--sc-ink) calc(100% - var(--s, 0) * 38%), var(--sc-canvas)); }
+  .tic { background: none; color: inherit; text-decoration: underline wavy transparent; text-decoration-thickness: 1.5px; text-underline-offset: 0.22em; text-decoration-skip-ink: none; transition: text-decoration-color 220ms var(--sc-ease-out); }
+  .tic--glyph { text-decoration: none; border-radius: 50%; outline: 1.5px solid transparent; outline-offset: 1px; transition: outline-color 220ms var(--sc-ease-out); }
+  .desk.f1 .tic[data-f="1"], .desk.f2 .tic[data-f="2"], .desk.f3 .tic[data-f="3"], .desk.f4 .tic[data-f="4"] { text-decoration-color: var(--sc-accent); }
+  .desk.f1 .tic--glyph { outline-color: var(--sc-accent); }
+  .galley--after, .rm-only { display: none; }
+
+  .panel { display: grid; gap: var(--sc-5); align-content: start; padding-top: var(--sc-2); }
+  .meter__n { font-family: var(--sc-font-mono); font-size: 4rem; line-height: 1; letter-spacing: -0.05em; margin-top: var(--sc-2); color: var(--sc-accent); font-variant-numeric: tabular-nums; }
+  .meter__n small { font-size: 1.1rem; letter-spacing: 0; color: var(--sc-ink-soft); }
+  .desk.done .meter__n { color: var(--sc-ink); }
+  .meter__bar { height: 4px; background: var(--sc-hairline-strong); margin-top: var(--sc-3); overflow: hidden; border-radius: 2px; }
+  .meter__bar span { display: block; height: 100%; background: currentColor; color: var(--sc-ink); transform-origin: 0 50%; transform: scaleX(var(--score, 0.32)); transition: transform 360ms var(--sc-ease-out); }
+  .live { width: 100%; border-collapse: collapse; font-family: var(--sc-font-mono); font-size: 0.8rem; }
+  .live th { text-align: left; font-weight: 400; color: var(--sc-ink-soft); padding: 0.22rem 0; }
+  .live td { text-align: right; padding: 0.22rem 0; }
+  .live tr + tr { border-top: 1px solid var(--sc-hairline); }
+  .live td.bad { color: var(--sc-accent); }
+  .notes { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sc-3); font-size: 0.9rem; line-height: 1.42; }
+  .notes li { opacity: 0.0; transform: translateX(6px); transition: opacity 240ms var(--sc-ease-out), transform 240ms var(--sc-ease-out); padding-left: 0.8rem; border-left: 1px solid var(--sc-accent); }
+  .notes li.on { opacity: 1; transform: none; }
+  .desk.editing .notes li.on { opacity: 0.7; }
+  .notes b { font-weight: 600; color: var(--sc-accent); }
+  .slot { display: grid; min-height: 4.6em; }
+  .slot > * { grid-area: 1 / 1; }
+  .log { font-family: var(--sc-font-mono); font-size: 0.82rem; line-height: 1.45; opacity: 0; transition: opacity 200ms var(--sc-ease-out); }
+  .log b { color: var(--sc-accent); font-weight: 500; }
+  .desk.editing:not(.done) .log { opacity: 1; }
+  .resolve { font-size: 1.02rem; line-height: 1.45; }
+
+  /* ------------------------------------------------------------- the report */
+  .paper { background: var(--sc-surface); }
+  .report, .facts { padding-block: clamp(4rem, 9vw, 8rem); }
+  .head { max-width: 46rem; margin-bottom: var(--sc-7); }
+  .head h2 { font-size: var(--sc-t-2xl); line-height: 1.05; }
+  .head p { margin-top: var(--sc-4); font-size: var(--sc-t-lg); line-height: 1.45; color: var(--sc-ink-soft); max-width: 52ch; }
+  [role="tablist"] { display: flex; flex-wrap: wrap; gap: var(--sc-2); margin-bottom: var(--sc-5); }
+  [role="tab"] { font-family: var(--sc-font-mono); font-size: 0.82rem; background: transparent; border: 1px solid var(--sc-hairline-strong); border-radius: var(--r); padding: 0.5rem 0.85rem; cursor: pointer; transition: background-color 160ms var(--sc-ease-out), color 160ms var(--sc-ease-out); }
+  [role="tab"][aria-selected="true"] { background: var(--sc-ink); color: var(--sc-surface); border-color: var(--sc-ink); }
+  [role="tab"]:active { transform: translateY(1px); }
+  @media (hover: hover) and (pointer: fine) { [role="tab"]:not([aria-selected="true"]):hover { background: var(--sc-canvas); } }
+  .case + .case { margin-top: var(--sc-8); }
+  .js .case + .case { margin-top: 0; }
+  .case__title { font-size: var(--sc-t-xl); margin-bottom: var(--sc-5); display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }
+  .case__cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-6); }
+  .case__label { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); margin-bottom: var(--sc-3); }
+  .case__text { white-space: pre-wrap; font-size: 0.98rem; line-height: 1.55; padding: var(--sc-5); border-radius: var(--r); }
+  .case__col--before .case__text { background: var(--sc-canvas); color: #3E3B42; }
+  .case__col--after .case__text { background: #fff; box-shadow: var(--sc-e1); }
+  .case__meta { display: grid; grid-template-columns: minmax(0, 22rem) 1fr; gap: var(--sc-6); margin-top: var(--sc-5); align-items: start; }
+  .measures { width: 100%; border-collapse: collapse; font-family: var(--sc-font-mono); font-size: 0.82rem; }
+  .measures caption { text-align: left; font-size: var(--sc-t-xs); color: var(--sc-ink-soft); padding-bottom: var(--sc-2); }
+  .measures th, .measures td { padding: 0.32rem 0; border-top: 1px solid var(--sc-hairline); }
+  .measures thead th { color: var(--sc-ink-soft); font-weight: 400; border-top: 0; }
+  .measures td, .measures thead th { text-align: right; width: 5rem; }
+  .measures tbody th { text-align: left; font-weight: 400; color: var(--sc-ink-soft); }
+  .measures tr:last-child td:last-child { color: var(--sc-accent); font-weight: 500; }
+  .removed ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; font-size: 0.95rem; }
+  .removed s { text-decoration-color: var(--sc-accent); text-decoration-thickness: 1.5px; color: var(--sc-ink-soft); }
+
+  .bench { margin-top: var(--sc-9); padding-top: var(--sc-7); border-top: 1px solid var(--sc-hairline-strong); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--sc-7); align-items: start; }
+  .bench h3 { font-size: var(--sc-t-xl); }
+  .bench__note { margin-top: var(--sc-3); color: var(--sc-ink-soft); max-width: 40ch; }
+  .bench__pair { display: grid; gap: var(--sc-3); margin-top: var(--sc-6); }
+  .bench__big { font-family: var(--sc-font-mono); font-size: var(--sc-t-3xl); line-height: 1; letter-spacing: -0.04em; }
+  .bench__big small { font-size: var(--sc-t-sm); letter-spacing: 0; color: var(--sc-ink-soft); margin-left: 0.6rem; }
+  .bench__big--soft { color: var(--sc-ink-soft); }
+  .bench table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  .bench th, .bench td { text-align: left; padding: 0.6rem 0.5rem 0.6rem 0; border-top: 1px solid var(--sc-hairline); vertical-align: top; }
+  .bench thead th { font-family: var(--sc-font-mono); font-size: var(--sc-t-xs); font-weight: 400; color: var(--sc-ink-soft); border-top: 0; }
+  .bench tbody th { font-weight: 400; }
+  .bench td { font-family: var(--sc-font-mono); font-size: 0.85rem; white-space: nowrap; }
+  .bench td:nth-child(2) { color: var(--sc-ink); font-weight: 500; }
+  .bench td:nth-child(3) { color: var(--sc-ink-soft); }
+  .more { margin-top: var(--sc-5); font-size: 0.95rem; }
+  a { text-decoration-color: color-mix(in oklab, currentColor 45%, transparent); }
+
+  /* ------------------------------------------------------------ the facts */
+  .facts__grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--sc-8); align-items: start; }
+  .correction { padding: var(--sc-6); }
+  .correction .was { margin-top: var(--sc-4); font-size: 1.05rem; line-height: 1.5; color: var(--sc-ink-soft); }
+  .correction .was s { text-decoration-color: var(--sc-accent); text-decoration-thickness: 2px; }
+  .correction .now-wrap { margin-top: var(--sc-5); padding-top: var(--sc-5); border-top: 1px dashed var(--sc-hairline-strong); }
+  .correction .now { font-size: var(--sc-t-lg); line-height: 1.42; padding-block: 0.1em; }
+  .flag { margin-top: var(--sc-7); padding-left: var(--sc-5); border-left: 1px solid var(--sc-accent); }
+  .flag h3, .limits h3 { font-size: var(--sc-t-lg); margin-bottom: var(--sc-3); }
+  .flag p + p { margin-top: var(--sc-3); }
+  .flag p, .limits li { line-height: 1.55; }
+  .invented { margin-top: var(--sc-5); display: grid; gap: var(--sc-2); }
+  .invented q { font-style: italic; }
+  .limits ul { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--sc-3); }
+  .limits li::marker { color: var(--sc-accent); }
+  .limits + .limits { margin-top: var(--sc-7); }
+  .big-zero { font-family: var(--sc-font-mono); font-size: var(--sc-t-2xl); letter-spacing: -0.04em; line-height: 1; }
+  .big-zero small { font-size: var(--sc-t-sm); letter-spacing: 0; color: var(--sc-ink-soft); margin-left: 0.5rem; }
+
+  /* ---------------------------------------------------------- the install */
+  .install { min-height: calc(100svh - var(--bar-h)); display: flex; flex-direction: column; justify-content: center; padding-block: clamp(3rem, 8vh, 6rem) var(--sc-6); }
+  .install h2 { font-size: var(--sc-t-2xl); line-height: 1.05; }
+  .install__lede { margin-top: var(--sc-4); font-size: var(--sc-t-lg); color: var(--sc-ink-soft); }
+  .cmds { margin-top: var(--sc-6); display: grid; gap: var(--sc-3); max-width: 46rem; }
+  .cmd { display: grid; grid-template-columns: auto 1fr auto; align-items: stretch; background: var(--sc-ink); color: #F1EFEA; border-radius: var(--r); box-shadow: var(--sc-e2); }
+  .cmd label { font-family: var(--sc-font-mono); font-size: 0.8rem; color: #A9A6AE; padding: 0 0 0 1rem; display: flex; align-items: center; }
+  .cmd textarea { resize: none; overflow: hidden; line-height: 1.4; height: calc(1.4em + 2rem);  font-family: var(--sc-font-mono); font-size: clamp(0.82rem, 0.75rem + 0.3vw, 1rem); background: transparent; border: 0; color: inherit; padding: 1rem; min-width: 0; text-overflow: ellipsis; }
+  .cmd textarea:focus-visible { outline-offset: -3px; outline-color: #F08A80; }
+  .cmd button { font-family: var(--sc-font-mono); font-size: 0.8rem; border: 0; border-left: 1px solid #3A383F; background: transparent; color: #F1EFEA; padding: 0 1.1rem; cursor: pointer; border-radius: 0 var(--r) var(--r) 0; min-width: 5.5rem; transition: background-color 160ms var(--sc-ease-out); }
+  .cmd button:active { transform: translateY(1px); }
+  .cmd button:focus-visible { outline-offset: -3px; outline-color: #F08A80; }
+  @media (hover: hover) and (pointer: fine) { .cmd button:hover { background: #2C2A30; } }
+  .install__then { margin-top: var(--sc-5); max-width: 52ch; line-height: 1.55; }
+  .install code { font-family: var(--sc-font-mono); font-size: 0.9em; background: var(--sc-canvas); padding: 0.1em 0.35em; border-radius: 3px; }
+  .colophon { margin-top: auto; padding-top: var(--sc-8); display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-family: var(--sc-font-mono); font-size: 0.78rem; color: var(--sc-ink-soft); }
+
+  /* ------------------------------------------------------------- reduced motion: two static texts */
+  .rm .drawer { padding-block: var(--sc-8); }
+  .rm .rail { flex-wrap: wrap; justify-content: center; padding-bottom: 0; }
+  .rm .desk__stage { height: auto; min-height: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 90rem; margin-inline: auto; padding-block: var(--sc-8); }
+  .rm .galley--after, .rm .rm-only { display: block; }
+  .rm .live, .rm .slot, .rm .meter { display: none; }
+  .rm .panel { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rm .notes { display: contents; }
+  .rm .notes li { opacity: 1; transform: none; }
+  .rm .sheet--after { display: block; }
+  .sheet--after { display: none; }
+  .sheet__score { font-family: var(--sc-font-mono); color: var(--sc-accent); }
+
+  /* ----------------------------------------------------------------- phone */
+  @media (max-width: 860px) {
+    :root { --bar-h: 48px; }
+    .status { gap: var(--sc-3); font-size: 0.74rem; }
+    .status__steps { display: none; }
+    .hero { padding-top: 1.25rem; }
+    .hero__bar { flex-direction: column; gap: var(--sc-2); }
+    .hero__sub { font-size: 1.02rem; }
+    .hero__desk { grid-template-columns: minmax(0, 1fr); }
+    .feed { padding: var(--sc-4) var(--sc-4) var(--sc-3); }
+    .feed__body { font-size: 0.95rem; max-height: 15.5em; }
+    .scan { margin: -1.75rem 0.5rem 0 1.25rem; padding: var(--sc-4); rotate: -1deg; }
+    .scan__score { font-size: 2.6rem; margin: var(--sc-2) 0 var(--sc-3); }
+    .readings { font-size: 0.74rem; gap: 0.2rem 0.75rem; }
+    .scan__foot { display: none; }
+
+    .rail { gap: var(--sc-4); }
+    .slip { padding: var(--sc-4); }
+    .slip q { font-size: 0.92rem; }
+
+    .desk__stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 0.6rem; padding: 0.6rem 0.75rem calc(var(--bar-h) + 0.5rem); }
+    .sheet { padding: 0.8rem 0.95rem; grid-row: 2; align-self: start; }
+    .sheet__head { margin-bottom: 0.5rem; padding-bottom: 0.4rem; }
+    .galley { font-size: clamp(11.5px, 1.52svh, 13px); line-height: 1.38; }
+    .sheet > .sheet__head { display: none; }
+    .rm .sheet > .sheet__head { display: flex; }
+    .u + .u { margin-top: 0.55em; }
+    .panel { display: contents; }
+    .meter { grid-row: 1; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0 0.9rem; padding: 0 0.2rem; }
+    .meter .label { grid-column: 1 / -1; }
+    .meter__n { font-size: 2.1rem; margin: 0; }
+    .meter__bar { margin: 0; }
+    .live { display: none; }
+    .notes, .slot { position: absolute; left: 0.75rem; right: 0.75rem; bottom: calc(var(--bar-h) + 0.6rem); }
+    .notes { display: block; font-size: 0.84rem; }
+    .notes li { position: absolute; inset: auto 0 0 0; background: var(--sc-surface); padding: 0.6rem 0.75rem; box-shadow: var(--sc-e2); border-left-width: 2px; border-radius: 0 var(--r) var(--r) 0; }
+    .notes li.on:not(.cur) { opacity: 0; }
+    .desk.editing .notes li.on { opacity: 0; }
+    .slot { min-height: 0; }
+    .log, .resolve { background: var(--sc-surface); padding: 0.6rem 0.75rem; box-shadow: var(--sc-e2); border-radius: var(--r); font-size: 0.82rem; align-self: end; }
+    .desk:not(.editing) .log, .desk.done .log { opacity: 0; }
+    .resolve { font-size: 0.9rem; }
+
+    .case__cols, .case__meta, .bench, .facts__grid { grid-template-columns: minmax(0, 1fr); }
+    .case__cols { gap: var(--sc-4); }
+    .case__text { font-size: 0.92rem; padding: var(--sc-4); }
+    .bench { gap: var(--sc-5); }
+    .bench td { white-space: normal; }
+    .facts__grid { gap: var(--sc-7); }
+    .correction { padding: var(--sc-5); }
+    .cmd textarea { padding: 0.8rem 0.6rem; font-size: 0.76rem; height: calc(4.2em + 1.6rem); }
+    .tic { text-decoration-thickness: 1px; }
+    .cmd button { min-width: 4.6rem; padding: 0 0.8rem; }
+
+    .rm .drawer { padding-block: var(--sc-8); }
+  .rm .rail { flex-wrap: wrap; justify-content: center; padding-bottom: 0; }
+  .rm .desk__stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; padding-inline: var(--sc-gutter); }
+    .rm .sheet { grid-row: auto; }
+    .rm .panel { display: block; grid-row: auto; }
+    .rm .notes { display: grid; position: static; }
+    .rm .notes li { position: static; opacity: 1; box-shadow: none; background: none; }
+  }
+</style>
+<noscript><style>
+  .galley--after, .sheet--after, .rm-only { display: block !important; }
+  .desk__stage { height: auto !important; }
+  .notes li { opacity: 1 !important; transform: none !important; }
+  .live, .slot, .meter { display: none !important; }
+</style></noscript>
+</head>
+<body>
+<a class="skip" href="#install">Skip to install</a>
+
+<nav class="status" aria-label="Sections">
+  <a class="status__mark" href="#scan">text-humanizer</a>
+  <ol class="status__steps">
+    <li><a href="#scan">scan</a></li>
+    <li><a href="#tics">tics</a></li>
+    <li><a href="#rewrite">rewrite</a></li>
+    <li><a href="#report">report</a></li>
+    <li><a href="#facts">limits</a></li>
+  </ol>
+  <p class="status__score" aria-live="off">score <b id="st-score">32</b>/100</p>
+  <a class="status__cta" href="#install">Install the plugin</a>
+</nav>
+
+<main>
+
+  <!-- 1 RECOGNITION: flow. The input, already loaded and already measured. -->
+  <section class="hero" id="scan" data-sc-act="flow">
+    <header class="hero__bar">
+      <h1 class="hero__title">text-humanizer</h1>
+      <p class="hero__sub">A Claude Code skill that rewrites AI-written text so it reads like a person wrote it. French and English.</p>
+    </header>
+    <div class="hero__desk">
+      <article class="feed sheet-paper" aria-label="An AI-written LinkedIn post, one of the four test texts">
+        <p class="feed__meta label">AI draft · linkedin-post-fr · one of the four test texts</p>
+        <div class="feed__body" lang="fr"><p>🚀 Dans un monde en constante évolution, la modernisation des applications legacy n'est plus une option — c'est une nécessité.</p><p>Ces trois derniers mois, notre équipe a eu le privilège d'accompagner un client dans un projet véritablement transformateur : la migration de son application métier de .NET Framework 4.6 vers .NET 8.</p><p>💡 Ce n'est pas qu'une simple mise à jour technique, c'est un véritable tournant stratégique.</p><p>Voici les 3 enseignements clés que nous en retirons :</p><p>✅ **Anticiper** : Une cartographie précise des dépendances est cruciale pour éviter les mauvaises surprises.<br>✅ **Itérer** : Une approche progressive permet de réduire les risques tout en maintenant la continuité de service.<br>✅ **Collaborer** : L'implication des équipes métier joue un rôle essentiel dans la réussite du projet.</p><p>En fin de compte, cette migration a permis d'améliorer les performances, de renforcer la sécurité et de réduire les coûts de maintenance.</p><p>Et vous, où en êtes-vous dans la modernisation de vos applications ? 👇</p><p>#DotNet #Modernisation #TransformationDigitale #Legacy #Innovation</p></div>
+        <a class="feed__more" href="#rewrite">… see more</a>
+      </article>
+      <aside class="scan sheet-paper" aria-label="What scan.py measures on this post">
+        <p class="label">scan.py · fr · linkedin</p>
+        <p class="scan__score">32<small>/100</small></p>
+        <dl class="readings">
+          <dt>words</dt><dd>166</dd>
+          <dt>emoji</dt><dd class="bad">6</dd>
+          <dt>em dashes</dt><dd class="bad">1</dd>
+          <dt>stock phrases</dt><dd class="bad">8</dd>
+          <dt>Markdown bold</dt><dd class="bad">3</dd>
+          <dt>hashtags (max 3)</dt><dd class="bad">5</dd>
+          <dt>rhythm CV (flat &lt; 0.45)</dt><dd class="bad">0.39</dd>
+        </dl>
+        <p class="scan__foot">Further down, the skill's real rewrite replaces this post one edit at a time, and every number here is measured again.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 2 COMPLICITY: pan. The same habits across all four drafts. -->
+  <section id="tics" data-sc-act="pan" data-sc-span="2.6">
+    <div data-sc-stage class="drawer">
+      <div class="rail" data-sc-pan="0.04">
+        <div class="rail__lead">
+          <h2>Same tics, four drafts</h2>
+          <p>The four AI drafts the skill was tested on: a LinkedIn post and a video script in French, a sales email and a blog post in English. Different jobs, the same habits.</p>
+        </div>
+        <article class="slip"><h3>The opener</h3><ul><li><q lang="fr">Dans un monde en constante évolution,</q><span class="tag">linkedin · fr</span></li><li><q lang="en">In today's fast-paced logistics landscape,</q><span class="tag">email · en</span></li><li><q lang="en">In today's ever-evolving tech landscape,</q><span class="tag">blog · en</span></li><li><q lang="fr">Salut à tous et bienvenue sur la chaîne !</q><span class="tag">youtube · fr</span></li></ul></article>
+<article class="slip"><h3>Not X, it's Y</h3><ul><li><q lang="fr">la modernisation des applications legacy n'est plus une option — c'est une nécessité.</q><span class="tag">linkedin · fr</span></li><li><q lang="en">modernizing legacy systems is not just a technical upgrade; it's a strategic imperative.</q><span class="tag">email · en</span></li><li><q lang="fr">Ce n'est pas simplement un assistant — c'est un véritable partenaire de développement.</q><span class="tag">youtube · fr</span></li></ul></article>
+<article class="slip"><h3>The em dash</h3><ul><li><q lang="en">— it was truly a pleasure connecting with you.</q><span class="tag">email · en</span></li><li><q lang="en">— a testament to the transformative power of a well-executed migration.</q><span class="tag">email · en</span></li><li><q lang="en">is not just a best practice — it's a strategic imperative.</q><span class="tag">blog · en</span></li></ul></article>
+<article class="slip"><h3>Bold triplets</h3><ul><li><q lang="fr">✅ **Anticiper** : Une cartographie précise des dépendances est cruciale</q><span class="tag">linkedin · fr</span></li><li><q lang="en">- **Pragmatic**: We focus on delivering tangible results.</q><span class="tag">email · en</span></li><li><q lang="en">- **Assessment**: Inventory your dependencies and identify potential blockers.</q><span class="tag">blog · en</span></li><li><q lang="fr">1. La mise en place de l'environnement de travail.</q><span class="tag">youtube · fr</span></li></ul></article>
+<article class="slip"><h3>Connectors</h3><ul><li><q lang="en">Furthermore,</q><span class="tag">email · en</span></li><li><q lang="en">It's worth noting that</q><span class="tag">blog · en</span></li><li><q lang="fr">Tout d'abord, il convient de noter que</q><span class="tag">youtube · fr</span></li><li><q lang="fr">En outre,</q><span class="tag">youtube · fr</span></li><li><q lang="en">In conclusion,</q><span class="tag">blog · en</span></li><li><q lang="fr">En fin de compte,</q><span class="tag">linkedin · fr</span></li></ul></article>
+<article class="slip"><h3>Borrowed awe</h3><ul><li><q lang="fr">un sujet fascinant</q><span class="tag">youtube · fr</span></li><li><q lang="fr">un projet véritablement transformateur</q><span class="tag">linkedin · fr</span></li><li><q lang="en">the vibrant ecosystem of libraries</q><span class="tag">blog · en</span></li><li><q lang="en">navigate this complex journey seamlessly</q><span class="tag">email · en</span></li><li><q lang="fr">cette aventure passionnante</q><span class="tag">youtube · fr</span></li></ul></article>
+<article class="slip"><h3>The sign-off</h3><ul><li><q lang="fr">Et vous, où en êtes-vous dans la modernisation de vos applications ? 👇</q><span class="tag">linkedin · fr</span></li><li><q lang="fr">#DotNet #Modernisation #TransformationDigitale #Legacy #Innovation</q><span class="tag">linkedin · fr</span></li><li><q lang="fr">Alors, sans plus attendre, plongeons ensemble dans cette aventure passionnante !</q><span class="tag">youtube · fr</span></li></ul></article>
+        <div class="rail__end">
+          <p>Across the four drafts, scan.py counts 49 stock phrases, 5 em dashes and 6 emoji in 692 words.</p>
+          <p>In the four rewrites: zero of each.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- authored silence before the peak -->
+  <section class="hush" data-sc-act="flow"><p>text-humanizer: rewriting linkedin-post-fr</p></section>
+
+  <!-- 3 RELIEF, the peak: pin. The scroll performs the edit. -->
+  <section id="rewrite" class="desk" data-sc-act="pin" data-sc-span="6">
+    <div data-sc-stage class="desk__stage" data-sc-verify-state="0|0|0.00|read">
+      <div class="sheet sheet-paper" lang="fr">
+        <p class="sheet__head label"><span>linkedin-post-fr.txt</span><span class="rm-only sheet__score">before · 32/100 · 166 words</span></p>
+        <div class="galley" id="galley">
+<div class="u u--cut" data-i="0"><p class="u__b"><span class="u__ink"><mark class="tic tic--glyph" data-f="1">🚀</mark> <mark class="tic" data-f="2">Dans un monde en constante évolution</mark>, la modernisation des applications legacy <mark class="tic" data-f="3">n'est plus une option</mark> <mark class="tic" data-f="1">—</mark> c'est une nécessité.</span></p></div>
+<div class="u" data-i="1"><p class="u__b"><span class="u__ink">Ces trois derniers mois, notre équipe a eu le privilège d'accompagner un client dans un projet <mark class="tic" data-f="2">véritablement</mark> <mark class="tic" data-f="2">transformateur</mark> : la migration de son application métier de .NET Framework 4.6 vers .NET 8.</span></p><p class="u__a">Trois mois. C'est le temps qu'il nous a fallu pour faire passer l'application métier d'un client de .NET Framework 4.6 à .NET 8.</p></div>
+<div class="u u--cut" data-i="2"><p class="u__b"><span class="u__ink"><mark class="tic tic--glyph" data-f="1">💡</mark> <mark class="tic" data-f="3">Ce n'est pas qu'une simple mise à jour technique, c'est</mark> un <mark class="tic" data-f="2">véritable</mark> tournant stratégique.</span></p></div>
+<div class="u u--cut" data-i="3"><p class="u__b"><span class="u__ink"><mark class="tic" data-f="3">Voici les 3 enseignements clés que nous en retirons</mark> :</span></p></div>
+<div class="u u--bullet" data-i="4"><p class="u__b"><span class="u__ink"><mark class="tic tic--glyph" data-f="1">✅</mark> <mark class="tic" data-f="1">**Anticiper**</mark> : Une cartographie précise des dépendances est <mark class="tic" data-f="2">cruciale</mark> pour éviter les mauvaises surprises.</span></p><p class="u__a">Si je ne devais garder qu'une leçon : on a cartographié les dépendances avant de toucher au code. Sans cette carte, les mauvaises surprises tombent en plein milieu du projet, au pire moment.</p></div>
+<div class="u u--bullet" data-i="5"><p class="u__b"><span class="u__ink"><mark class="tic tic--glyph" data-f="1">✅</mark> <mark class="tic" data-f="1">**Itérer**</mark> : Une approche progressive permet de réduire les risques tout en maintenant la continuité de service.</span></p><p class="u__a">Le reste en découle. On a avancé par petites étapes, ce qui a limité les risques et laissé l'application en service pendant toute la migration.</p></div>
+<div class="u u--bullet" data-i="6"><p class="u__b"><span class="u__ink"><mark class="tic tic--glyph" data-f="1">✅</mark> <mark class="tic" data-f="1">**Collaborer**</mark> : L'implication des équipes métier <mark class="tic" data-f="2">joue un rôle essentiel</mark> dans la réussite du projet.</span></p><p class="u__a">Et les équipes métier ont été dans la boucle du début à la fin. Sur ce genre de projet, ça pèse plus lourd que n'importe quel choix technique.</p></div>
+<div class="u" data-i="7"><p class="u__b"><span class="u__ink"><mark class="tic" data-f="2">En fin de compte</mark>, cette migration a permis d'améliorer les performances, de renforcer la sécurité et de réduire les coûts de maintenance.</span></p><p class="u__a">Côté résultat, l'application est plus rapide et sa maintenance coûte moins cher. La sécurité y gagne aussi.</p></div>
+<div class="u" data-i="8"><p class="u__b"><span class="u__ink"><mark class="tic" data-f="4">Et vous, où en êtes-vous dans la modernisation de vos applications ?</mark> <mark class="tic tic--glyph" data-f="1">👇</mark></span></p><p class="u__a">Si vous avez encore du .NET Framework en production, qu'est-ce qui vous retient de migrer ?</p></div>
+<div class="u" data-i="9"><p class="u__b"><span class="u__ink"><mark class="tic" data-f="4">#DotNet #Modernisation #TransformationDigitale #Legacy #Innovation</mark></span></p><p class="u__a">#dotnet #Legacy #Migration</p></div>
+        </div>
+      </div>
+      <div class="sheet sheet--after sheet-paper" lang="fr">
+        <p class="sheet__head label"><span>after the skill</span><span class="sheet__score">100/100 · 145 words</span></p>
+        <div class="galley galley--after"><p>Trois mois. C'est le temps qu'il nous a fallu pour faire passer l'application métier d'un client de .NET Framework 4.6 à .NET 8.</p><p>Si je ne devais garder qu'une leçon : on a cartographié les dépendances avant de toucher au code. Sans cette carte, les mauvaises surprises tombent en plein milieu du projet, au pire moment.</p><p>Le reste en découle. On a avancé par petites étapes, ce qui a limité les risques et laissé l'application en service pendant toute la migration.</p><p>Et les équipes métier ont été dans la boucle du début à la fin. Sur ce genre de projet, ça pèse plus lourd que n'importe quel choix technique.</p><p>Côté résultat, l'application est plus rapide et sa maintenance coûte moins cher. La sécurité y gagne aussi.</p><p>Si vous avez encore du .NET Framework en production, qu'est-ce qui vous retient de migrer ?</p><p>#dotnet #Legacy #Migration</p></div>
+      </div>
+      <aside class="panel" aria-label="scan.py, measured on the text as it stands">
+        <div class="meter">
+          <p class="label">scan.py score, on the text as it stands</p>
+          <p class="meter__n"><span id="pk-score">32</span><small>/100</small></p>
+          <div class="meter__bar"><span id="pk-bar"></span></div>
+        </div>
+        <table class="live" aria-label="Measures">
+          <tbody>
+            <tr><th scope="row">words</th><td data-k="words">166</td></tr>
+            <tr><th scope="row">emoji</th><td data-k="emoji">6</td></tr>
+            <tr><th scope="row">em dashes</th><td data-k="emdash">1</td></tr>
+            <tr><th scope="row">stock phrases</th><td data-k="phrases">8</td></tr>
+            <tr><th scope="row">Markdown bold</th><td data-k="bold">3</td></tr>
+            <tr><th scope="row">hashtags</th><td data-k="tags">5</td></tr>
+            <tr><th scope="row">rhythm CV</th><td data-k="cv">0.39</td></tr>
+          </tbody>
+        </table>
+        <ol class="notes">
+          <li data-f="1"><b>Typography.</b> 6 emoji, 1 em dash, 3 bold labels pasted as Markdown asterisks. An emoji in the first line already fails a LinkedIn check.</li>
+          <li data-f="2"><b>Stock phrases.</b> 8 hits from scan.py's French list, among them “in a constantly changing world”, “truly transformative”, “crucial”, “plays an essential role”, “at the end of the day”.</li>
+          <li data-f="3"><b>Structure.</b> “It's not X, it's Y”, twice. A list announced as “the 3 key lessons”. Sentence length barely varies: rhythm CV 0.39, and under 0.45 reads flat.</li>
+          <li data-f="4"><b>The ending.</b> A question asked to farm comments, a pointing emoji, and 5 hashtags where the format allows 3.</li>
+        </ol>
+        <div class="slot">
+          <p class="log" id="pk-log"></p>
+          <p class="resolve" data-sc-cue="0.9 1.2 0.15 0.1">145 words instead of 166. The facts stay. No emoji, no em dash, no stock phrase left.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 4 TRUST: count. Four real pairs and the benchmark. -->
+  <section id="report" class="report paper">
+    <div class="sc-wrap">
+      <div class="head">
+        <h2>Before and after</h2>
+        <p>The four texts from the benchmark: each draft as the model wrote it, each rewrite as the skill returned it, and what scan.py measured on both.</p>
+      </div>
+      <div role="tablist" aria-label="Test texts"><button role="tab" id="tab-email-relance-en" aria-controls="panel-email-relance-en" aria-selected="true" tabindex="0">email · en</button><button role="tab" id="tab-article-blog-en" aria-controls="panel-article-blog-en" aria-selected="false" tabindex="-1">blog · en</button><button role="tab" id="tab-script-youtube-fr" aria-controls="panel-script-youtube-fr" aria-selected="false" tabindex="-1">youtube · fr</button><button role="tab" id="tab-linkedin-post-fr" aria-controls="panel-linkedin-post-fr" aria-selected="false" tabindex="-1">linkedin · fr</button></div>
+<section class="case" role="tabpanel" id="panel-email-relance-en" aria-labelledby="tab-email-relance-en" data-case="email-relance-en">
+  <h3 class="case__title">Sales follow-up email <span class="tag">email · en</span></h3>
+  <div class="case__cols">
+    <div class="case__col case__col--before"><p class="case__label">Before: the AI draft, 167 words</p><div class="case__text" lang="en">Subject: Following Up: Unlocking the Full Potential of Your Legacy Systems
+
+Dear Sarah,
+
+I hope this email finds you well. I wanted to follow up on my previous message regarding our conversation at the Logistics Tech Summit — it was truly a pleasure connecting with you.
+
+In today's fast-paced logistics landscape, modernizing legacy systems is not just a technical upgrade; it's a strategic imperative. At Atypical Consulting, we specialize in helping organizations like yours navigate this complex journey seamlessly.
+
+Our approach is:
+- **Pragmatic**: We focus on delivering tangible results.
+- **Incremental**: We minimize disruption to your operations.
+- **Collaborative**: We work hand-in-hand with your teams.
+
+Furthermore, it's worth noting that we recently helped a client reduce their maintenance costs by 40% — a testament to the transformative power of a well-executed migration.
+
+Would you be open to a brief 20-minute call next week to explore how we might help you unlock the full potential of your systems?
+
+Looking forward to hearing from you.
+
+Best regards,
+Philippe</div></div>
+    <div class="case__col case__col--after"><p class="case__label">After: the skill's rewrite, 75 words</p><div class="case__text" lang="en">Subject: Legacy systems, a quick follow-up
+
+Hi Sarah,
+
+I'm following up on my note after we met at the Logistics Tech Summit, in case it got buried.
+
+We recently helped a client cut their maintenance costs by 40%. The work is done in small steps, so your teams keep shipping while the old systems get replaced.
+
+Would a 20-minute call next week make sense? If now isn't the right time, just tell me.
+
+Best,
+Philippe</div></div>
+  </div>
+  <div class="case__meta">
+    <table class="measures"><caption>Measured by scan.py</caption><thead><tr><th scope="col"></th><th scope="col">before</th><th scope="col">after</th></tr></thead><tbody><tr><th scope="row">words</th><td>167</td><td>75</td></tr><tr><th scope="row">rhythm (CV)</th><td>0.54</td><td>0.64</td></tr><tr><th scope="row">em dashes</th><td>2</td><td>0</td></tr><tr><th scope="row">emoji</th><td>0</td><td>0</td></tr><tr><th scope="row">stock phrases</th><td>13</td><td>0</td></tr><tr><th scope="row">score /100</th><td>42</td><td>100</td></tr></tbody></table>
+    <div class="removed"><p class="case__label">Phrases removed</p><ul lang="en"><li><s>furthermore</s></li><li><s>hope this email finds you</s></li><li><s>in today's fast-paced</s></li><li><s>it's worth noting</s></li><li><s>landscape</s></li><li><s>navigate</s></li><li><s>not just a technical upgrade; it's</s></li><li><s>seamlessly</s></li><li><s>strategic imperative</s></li><li><s>testament</s></li><li><s>transformative</s></li><li><s>unlock</s></li><li><s>unlocking</s></li></ul></div>
+  </div>
+</section>
+<section class="case" role="tabpanel" id="panel-article-blog-en" aria-labelledby="tab-article-blog-en" data-case="article-blog-en">
+  <h3 class="case__title">Blog post <span class="tag">blog · en</span></h3>
+  <div class="case__cols">
+    <div class="case__col case__col--before"><p class="case__label">Before: the AI draft, 214 words</p><div class="case__text" lang="en"># Unlocking the Power of Python Upgrades: A Comprehensive Guide
+
+In today's ever-evolving tech landscape, keeping your Python version up to date is not just a best practice — it's a strategic imperative. In this article, we'll explore why upgrading matters, how to plan your migration, and what pitfalls to avoid.
+
+## Why Upgrading Matters
+
+Python 3.13, the latest version of the language, brings a wealth of performance improvements, enhanced error messages, and robust new features. Furthermore, staying current ensures you benefit from the vibrant ecosystem of libraries that are increasingly dropping support for older versions.
+
+It's worth noting that Python 3.10 will continue to receive security updates until 2027, so teams still on it have plenty of time. However, it's important to remember that procrastination can lead to technical debt.
+
+## Planning Your Migration
+
+A successful migration hinges on three pillars:
+
+- **Assessment**: Inventory your dependencies and identify potential blockers.
+- **Testing**: Leverage your CI pipeline to run your test suite against the new version.
+- **Rollout**: Deploy incrementally to minimize risk and ensure a seamless transition.
+
+## Conclusion
+
+In conclusion, upgrading Python is a pivotal step in your journey toward a more secure, performant, and maintainable codebase. By following these best practices, you'll be well-equipped to navigate the upgrade process with confidence.</div></div>
+    <div class="case__col case__col--after"><p class="case__label">After: the skill's rewrite, 207 words</p><div class="case__text" lang="en"># Upgrading Python: why now, and how to plan it
+
+Python 3.10 stopped receiving security updates on October 1, 2026. If it still runs in your production, any vulnerability found from now on stays open. Time to plan.
+
+## Why upgrade
+
+The current release is Python 3.15, out since October 9, 2026, with lazy imports for faster startup, a significantly upgraded experimental JIT compiler and better error messages. You don't have to jump straight to it: 3.11 to 3.14 are still supported, and 3.11 is the next to lose security fixes, in October 2027.
+
+Libraries won't wait for you. They drop old Python versions over time, and staying behind means pinning old releases that no longer get fixes.
+
+Every release you skip makes the jump bigger.
+
+## Planning the migration
+
+Start with an inventory of your dependencies and check which ones support your target version, because that's where most blockers show up, before you've touched a line of code.
+
+Then add the new version to your CI matrix. Run the full suite. Fix what breaks.
+
+Roll out one service or environment at a time, so a problem stays small and easy to roll back.
+
+None of this is hard. It just gets harder the longer you wait.</div></div>
+  </div>
+  <div class="case__meta">
+    <table class="measures"><caption>Measured by scan.py</caption><thead><tr><th scope="col"></th><th scope="col">before</th><th scope="col">after</th></tr></thead><tbody><tr><th scope="row">words</th><td>214</td><td>207</td></tr><tr><th scope="row">rhythm (CV)</th><td>0.3</td><td>0.71</td></tr><tr><th scope="row">em dashes</th><td>1</td><td>0</td></tr><tr><th scope="row">emoji</th><td>0</td><td>0</td></tr><tr><th scope="row">stock phrases</th><td>16</td><td>0</td></tr><tr><th scope="row">score /100</th><td>30</td><td>94</td></tr></tbody></table>
+    <div class="removed"><p class="case__label">Phrases removed</p><ul lang="en"><li><s>ever-evolving</s></li><li><s>furthermore</s></li><li><s>in conclusion</s></li><li><s>in this article</s></li><li><s>in today's ever</s></li><li><s>it's important to remember</s></li><li><s>it's worth noting</s></li><li><s>landscape</s></li><li><s>leverage</s></li><li><s>navigate</s></li><li><s>pivotal</s></li><li><s>robust</s></li><li><s>seamless</s></li><li><s>strategic imperative</s></li><li><s>unlocking</s></li><li><s>vibrant</s></li></ul></div>
+  </div>
+</section>
+<section class="case" role="tabpanel" id="panel-script-youtube-fr" aria-labelledby="tab-script-youtube-fr" data-case="script-youtube-fr">
+  <h3 class="case__title">YouTube intro script <span class="tag">youtube · fr</span></h3>
+  <div class="case__cols">
+    <div class="case__col case__col--before"><p class="case__label">Before: the AI draft, 145 words</p><div class="case__text" lang="fr">Salut à tous et bienvenue sur la chaîne ! Dans la vidéo d'aujourd'hui, nous allons plonger au cœur d'un sujet fascinant : le développement d'applications iOS assisté par l'intelligence artificielle.
+
+À l'ère de l'IA générative, les outils comme Claude Code révolutionnent la façon dont nous concevons nos logiciels. Ce n'est pas simplement un assistant — c'est un véritable partenaire de développement.
+
+Dans cette vidéo, nous allons explorer trois aspects essentiels :
+1. La mise en place de l'environnement de travail.
+2. La génération du code de l'application.
+3. Les tests et le déploiement sur l'App Store.
+
+Tout d'abord, il convient de noter que je ne suis pas un développeur iOS expérimenté. En outre, j'ai relevé le défi de créer cette application en un seul week-end. Le résultat ? Une application fonctionnelle, élégante et performante.
+
+Alors, sans plus attendre, plongeons ensemble dans cette aventure passionnante !</div></div>
+    <div class="case__col case__col--after"><p class="case__label">After: the skill's rewrite, 94 words</p><div class="case__text" lang="fr">Un week-end. C'est le temps qu'il m'a fallu pour coder une app iOS avec Claude Code, alors que je suis loin d'être un développeur iOS expérimenté.
+
+L'app fonctionne. Elle est propre. Et je vous montre tout.
+
+On commence par installer l'environnement de travail, puis je laisse Claude Code générer le code de l'app, et on finit par les tests et la publication sur l'App Store.
+
+Claude Code, je m'en sers pas comme d'une autocomplétion de luxe. Je lui confie de vrais morceaux du boulot, un peu comme à un collègue.
+
+Allez, on y va.</div></div>
+  </div>
+  <div class="case__meta">
+    <table class="measures"><caption>Measured by scan.py</caption><thead><tr><th scope="col"></th><th scope="col">before</th><th scope="col">after</th></tr></thead><tbody><tr><th scope="row">words</th><td>145</td><td>94</td></tr><tr><th scope="row">rhythm (CV)</th><td>0.59</td><td>0.91</td></tr><tr><th scope="row">em dashes</th><td>1</td><td>0</td></tr><tr><th scope="row">emoji</th><td>0</td><td>0</td></tr><tr><th scope="row">stock phrases</th><td>12</td><td>0</td></tr><tr><th scope="row">score /100</th><td>54</td><td>100</td></tr></tbody></table>
+    <div class="removed"><p class="case__label">Phrases removed</p><ul lang="fr"><li><s>dans la vidéo d'aujourd'hui</s></li><li><s>en outre</s></li><li><s>fascinant</s></li><li><s>il convient de noter</s></li><li><s>le résultat ?</s></li><li><s>passionnante</s></li><li><s>plongeons ensemble</s></li><li><s>révolutionnent</s></li><li><s>sans plus attendre</s></li><li><s>tout d'abord</s></li><li><s>véritable</s></li><li><s>à l'ère de l'</s></li></ul></div>
+  </div>
+</section>
+<section class="case" role="tabpanel" id="panel-linkedin-post-fr" aria-labelledby="tab-linkedin-post-fr" data-case="linkedin-post-fr">
+  <h3 class="case__title">LinkedIn post <span class="tag">linkedin · fr</span></h3>
+  <div class="case__cols">
+    <div class="case__col case__col--before"><p class="case__label">Before: the AI draft, 166 words</p><div class="case__text" lang="fr">🚀 Dans un monde en constante évolution, la modernisation des applications legacy n'est plus une option — c'est une nécessité.
+
+Ces trois derniers mois, notre équipe a eu le privilège d'accompagner un client dans un projet véritablement transformateur : la migration de son application métier de .NET Framework 4.6 vers .NET 8.
+
+💡 Ce n'est pas qu'une simple mise à jour technique, c'est un véritable tournant stratégique.
+
+Voici les 3 enseignements clés que nous en retirons :
+
+✅ **Anticiper** : Une cartographie précise des dépendances est cruciale pour éviter les mauvaises surprises.
+✅ **Itérer** : Une approche progressive permet de réduire les risques tout en maintenant la continuité de service.
+✅ **Collaborer** : L'implication des équipes métier joue un rôle essentiel dans la réussite du projet.
+
+En fin de compte, cette migration a permis d'améliorer les performances, de renforcer la sécurité et de réduire les coûts de maintenance.
+
+Et vous, où en êtes-vous dans la modernisation de vos applications ? 👇
+
+#DotNet #Modernisation #TransformationDigitale #Legacy #Innovation</div></div>
+    <div class="case__col case__col--after"><p class="case__label">After: the skill's rewrite, 145 words</p><div class="case__text" lang="fr">Trois mois. C'est le temps qu'il nous a fallu pour faire passer l'application métier d'un client de .NET Framework 4.6 à .NET 8.
+
+Si je ne devais garder qu'une leçon : on a cartographié les dépendances avant de toucher au code. Sans cette carte, les mauvaises surprises tombent en plein milieu du projet, au pire moment.
+
+Le reste en découle. On a avancé par petites étapes, ce qui a limité les risques et laissé l'application en service pendant toute la migration.
+
+Et les équipes métier ont été dans la boucle du début à la fin. Sur ce genre de projet, ça pèse plus lourd que n'importe quel choix technique.
+
+Côté résultat, l'application est plus rapide et sa maintenance coûte moins cher. La sécurité y gagne aussi.
+
+Si vous avez encore du .NET Framework en production, qu'est-ce qui vous retient de migrer ?
+
+#dotnet #Legacy #Migration</div></div>
+  </div>
+  <div class="case__meta">
+    <table class="measures"><caption>Measured by scan.py</caption><thead><tr><th scope="col"></th><th scope="col">before</th><th scope="col">after</th></tr></thead><tbody><tr><th scope="row">words</th><td>166</td><td>145</td></tr><tr><th scope="row">rhythm (CV)</th><td>0.39</td><td>0.55</td></tr><tr><th scope="row">em dashes</th><td>1</td><td>0</td></tr><tr><th scope="row">emoji</th><td>6</td><td>0</td></tr><tr><th scope="row">stock phrases</th><td>8</td><td>0</td></tr><tr><th scope="row">score /100</th><td>32</td><td>100</td></tr></tbody></table>
+    <div class="removed"><p class="case__label">Phrases removed</p><ul lang="fr"><li><s>ce n'est pas qu'une simple mise à jour technique, c'est</s></li><li><s>cruciale</s></li><li><s>dans un monde en constante évolution</s></li><li><s>en fin de compte</s></li><li><s>joue un rôle essentiel</s></li><li><s>transformateur</s></li><li><s>véritable</s></li><li><s>véritablement</s></li></ul></div>
+  </div>
+</section>
+      <div class="bench">
+        <div>
+          <h3>The benchmark</h3>
+          <p class="bench__note">Same four texts, same model (Claude Opus 5.5), run with the skill and without it. 65 checks in total, most of them scored by script.</p>
+          <div class="bench__pair">
+            <p class="bench__big"><span data-sc-count="0 65">65</span>/65<small>checks passed with the skill</small></p>
+            <p class="bench__big bench__big--soft"><span data-sc-count="0 49">49</span>/65<small>without it</small></p>
+          </div>
+        </div>
+        <div>
+          <table>
+            <thead><tr><th scope="col"></th><th scope="col">with skill</th><th scope="col">without</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Checks passed, final iteration</th><td>65 / 65</td><td>49 / 65</td></tr>
+              <tr><th scope="row">Invented details in the rewrite</th><td>0 of 4 texts</td><td>3 of 4 texts</td></tr>
+              <tr><th scope="row">Before/after measures in the answer</th><td>4 of 4</td><td>0 of 4</td></tr>
+              <tr><th scope="row">Indicative score, before → after</th><td>30-54 → 94-100</td><td>not measured</td></tr>
+            </tbody>
+          </table>
+          <p class="more">Method, iterations and how to rerun it: <a href="https://github.com/Atypical-Consulting/TextHumanizer/blob/main/BENCHMARK.md">BENCHMARK.md</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 RESPECT: reveal. What it will not do, and what it corrects. -->
+  <section id="facts" class="facts" data-sc-act="flow">
+    <div class="sc-wrap">
+      <div class="head">
+        <h2>What it will not do</h2>
+        <p>It never invents an anecdote, a figure or a quote to make a text sound lived-in. If a concrete detail would help, it suggests one in a separate section, for you to fill in if you have it.</p>
+      </div>
+      <div class="facts__grid">
+        <div>
+          <div class="correction sheet-paper">
+            <p class="label">correction · blog · en</p>
+            <p class="was" lang="en"><s>It's worth noting that Python 3.10 will continue to receive security updates until 2027, so teams still on it have plenty of time.</s></p>
+            <div class="now-wrap">
+              <p class="now" lang="en" data-sc-reveal="left" data-sc-reveal-at="0.28 0.5">Python 3.10 stopped receiving security updates on October 1, 2026. If it still runs in your production, any vulnerability found from now on stays open. Time to plan.</p>
+            </div>
+          </div>
+          <div class="flag">
+            <h3>Kept, and flagged</h3>
+            <p>The LinkedIn post moves an application to .NET 8. That is the author's choice, so the rewrite keeps it. But .NET 8 left Microsoft support on 10 November 2026, so the skill flags it under “Facts to check”, with the source and a ready-to-use alternative.</p>
+            <p><a href="https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core">.NET support policy, Microsoft</a></p>
+          </div>
+        </div>
+        <div>
+          <div class="limits">
+            <h3>Invented details</h3>
+            <p class="big-zero">0 of 4<small>texts with the skill</small></p>
+            <p class="big-zero" style="color: var(--sc-ink-soft); margin-top: 0.4rem;">3 of 4<small>without it</small></p>
+            <div class="invented">
+              <p>What the model added on its own, without the skill:</p>
+              <p><q>I've been coding for years</q>, <q>users didn't notice a thing</q>, a 25 % speed-up quoted from memory.</p>
+            </div>
+          </div>
+          <div class="limits">
+            <h3>Honest limits</h3>
+            <ul>
+              <li>The score is indicative. It counts patterns; it is not an AI detector.</li>
+              <li>Fact-checking needs a web search tool. Without one, dated facts are flagged as unverified.</li>
+              <li>With web search, the model without the skill also caught the .NET and Python facts, and also dropped the obvious tics. The skill guarantees the format, not the instinct.</li>
+              <li>It costs about 15 % more tokens and 30 to 45 seconds more per text.</li>
+              <li>Voice matching is only as good as the samples you give it.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 EASE: the close is an actual input. -->
+  <section id="install" class="install paper">
+    <div class="sc-wrap" style="display:flex; flex-direction:column; flex:1;">
+      <h2>Install the plugin</h2>
+      <p class="install__lede">In Claude Code, two commands.</p>
+      <div class="cmds">
+        <div class="cmd"><label for="cmd1">1</label><textarea id="cmd1" rows="1" readonly spellcheck="false">/plugin marketplace add Atypical-Consulting/TextHumanizer</textarea><button type="button" data-copy="cmd1">Copy</button></div>
+        <div class="cmd"><label for="cmd2">2</label><textarea id="cmd2" rows="1" readonly spellcheck="false">/plugin install text-humanizer@text-humanizer</textarea><button type="button" data-copy="cmd2">Copy</button></div>
+      </div>
+      <p class="install__then">Then paste a text and say it sounds like AI, or call <code>/text-humanizer:text-humanizer</code>. On Claude.ai or another agent, download the <a href="https://github.com/Atypical-Consulting/TextHumanizer/tree/main/plugins/text-humanizer/skills/text-humanizer">skill folder</a>, zip it and upload it as a skill.</p>
+      <footer class="colophon">
+        <span>MIT licence</span>
+        <a href="https://github.com/Atypical-Consulting/TextHumanizer">Source on GitHub</a>
+        <a href="https://github.com/Atypical-Consulting/TextHumanizer/blob/main/README.md">README</a>
+        <a href="https://atypical.consulting">Atypical Consulting</a>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.documentElement;
+  root.classList.add('js');
+  var desk = document.getElementById('rewrite');
+
+  // Reduced motion: the peak becomes two static texts side by side, with no
+  // pinned scroll space. Done before mount so the engine never pins it.
+  if (reduce) {
+    root.classList.add('rm');
+    desk.setAttribute('data-sc-act', 'flow');
+    desk.removeAttribute('data-sc-span');
+    desk.classList.add('f1', 'f2', 'f3', 'f4');
+    desk.querySelector('[data-sc-verify-state]').removeAttribute('data-sc-verify-state');
+    var tics = document.getElementById('tics');
+    tics.setAttribute('data-sc-act', 'flow');
+    tics.removeAttribute('data-sc-span');
+  }
+
+  ScrollCraft.mount(document.body);
+
+  // ------------------------------------------------------------ the edit --
+  // Every number shown here is scan.py's output on the exact text on screen
+  // at that step (computed at build time from examples.json, see build.py).
+  var STATES = [{"score": 32, "words": 166, "emoji": 6, "emdash": 1, "phrases": 8, "bold": 3, "tags": 5, "cv": 0.39}, {"score": 42, "words": 146, "emoji": 5, "emdash": 0, "phrases": 7, "bold": 3, "tags": 5, "cv": 0.41}, {"score": 58, "words": 137, "emoji": 5, "emdash": 0, "phrases": 5, "bold": 3, "tags": 5, "cv": 0.47}, {"score": 67, "words": 122, "emoji": 4, "emdash": 0, "phrases": 3, "bold": 3, "tags": 5, "cv": 0.49}, {"score": 67, "words": 112, "emoji": 4, "emdash": 0, "phrases": 3, "bold": 3, "tags": 5, "cv": 0.47}, {"score": 69, "words": 130, "emoji": 3, "emdash": 0, "phrases": 2, "bold": 2, "tags": 5, "cv": 0.44}, {"score": 83, "words": 137, "emoji": 2, "emdash": 0, "phrases": 2, "bold": 1, "tags": 5, "cv": 0.51}, {"score": 93, "words": 149, "emoji": 1, "emdash": 0, "phrases": 1, "bold": 0, "tags": 5, "cv": 0.49}, {"score": 97, "words": 144, "emoji": 1, "emdash": 0, "phrases": 0, "bold": 0, "tags": 5, "cv": 0.52}, {"score": 97, "words": 147, "emoji": 0, "emdash": 0, "phrases": 0, "bold": 0, "tags": 5, "cv": 0.52}, {"score": 100, "words": 145, "emoji": 0, "emdash": 0, "phrases": 0, "bold": 0, "tags": 3, "cv": 0.55}];
+  var LOG = ["Cut: the emoji opener, the stock phrase, the em dash.", "Rewritten: the hook is now the fact. Three months, .NET Framework 4.6 to .NET 8.", "Cut: “not just a technical update, a real strategic turning point”.", "Cut: “the 3 key lessons we take from it”.", "Bullet one becomes the one lesson, in the first person.", "Bullet two becomes a plain sentence about small steps.", "Bullet three loses “plays an essential role”.", "“At the end of the day” and the triple claim are gone. Same three results.", "The comment bait becomes a question for people still on .NET Framework.", "Five hashtags down to three."];
+  var units = [].slice.call(desk.querySelectorAll('.u'));
+  var notes = [].slice.call(desk.querySelectorAll('.notes li'));
+  var stage = desk.querySelector('.desk__stage');
+  var scoreEl = document.getElementById('pk-score');
+  var barEl = document.getElementById('pk-bar');
+  var logEl = document.getElementById('pk-log');
+  var stScore = document.getElementById('st-score');
+  var cells = [].slice.call(desk.querySelectorAll('.live td'));
+  var MARKS = [0.035, 0.085, 0.135, 0.185], E0 = 0.25, E1 = 0.88, D = (E1 - E0) / units.length;
+  var BAD = { emoji: 0, emdash: 0, phrases: 0, bold: 0 };
+  var curK = -1, curFam = -1, lastP = -1;
+
+  function paint(k) {
+    var s = STATES[k];
+    scoreEl.textContent = s.score;
+    stScore.textContent = s.score;
+    barEl.style.setProperty('--score', s.score / 100);
+    cells.forEach(function (td) {
+      var key = td.getAttribute('data-k'), v = s[key];
+      td.textContent = v;
+      td.classList.toggle('bad', (key in BAD && v > 0) || (key === 'tags' && v > 3) || (key === 'cv' && v < 0.45));
+    });
+    desk.classList.toggle('done', k === units.length);
+    if (k > 0 && k <= LOG.length) logEl.innerHTML = '<b>Edit ' + k + ' of ' + units.length + '.</b> ' + LOG[k - 1];
+  }
+
+  // FLIP: the paragraphs below a replaced one glide to their new place on
+  // transform instead of jumping, and nothing animates height.
+  function setK(k) {
+    var before = units.map(function (u) { return u.offsetParent ? u.getBoundingClientRect().top : null; });
+    units.forEach(function (u, i) {
+      var was = u.classList.contains('is-done');
+      u.classList.toggle('is-done', i < k);
+      u.classList.toggle('is-new', i < k && !was && i === k - 1);
+      u.classList.toggle('is-cur', i === k);
+      if (i !== k) u.style.removeProperty('--s');
+    });
+    if (reduce) return;
+    units.forEach(function (u, i) {
+      if (before[i] === null || !u.offsetParent) return;
+      var dy = before[i] - u.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) return;
+      u.style.transition = 'none';
+      u.style.transform = 'translateY(' + dy + 'px)';
+    });
+    void desk.offsetHeight;
+    units.forEach(function (u) {
+      if (!u.style.transform) return;
+      u.style.transition = 'transform 340ms cubic-bezier(0.23, 1, 0.32, 1)';
+      u.style.transform = '';
+    });
+  }
+
+  function frame() {
+    var p = parseFloat(desk.style.getPropertyValue('--sc-p')) || 0;
+    if (p !== lastP) {
+      lastP = p;
+      var fam = 0;
+      for (var m = 0; m < MARKS.length; m++) if (p >= MARKS[m]) fam = m + 1;
+      var x = (p - E0) / D;
+      var k = Math.max(0, Math.min(units.length, Math.floor(x - 0.8) + 1));
+      var s = k < units.length ? Math.max(0, Math.min(1, (x - k) / 0.72)) : 0;
+      if (fam !== curFam) {
+        curFam = fam;
+        for (var f = 1; f <= 4; f++) desk.classList.toggle('f' + f, fam >= f);
+        notes.forEach(function (n, i) { n.classList.toggle('on', i < fam); n.classList.toggle('cur', i === fam - 1); });
+      }
+      if (k !== curK) { curK = k; setK(k); paint(k); }
+      if (k < units.length) units[k].style.setProperty('--s', s.toFixed(3));
+      var mode = p >= E1 ? 'done' : p >= E0 ? 'edit' : fam ? 'marks' : 'read';
+      desk.classList.toggle('editing', p >= E0);
+      stage.setAttribute('data-sc-verify-state', fam + '|' + k + '|' + s.toFixed(2) + '|' + mode);
+      if (p >= 0.94) stage.setAttribute('data-sc-verify-hold', 'true');
+      else stage.removeAttribute('data-sc-verify-hold');
+    }
+    requestAnimationFrame(frame);
+  }
+  if (reduce) { paint(0); } else { requestAnimationFrame(frame); }
+
+  // -------------------------------------------------------- the specimens --
+  // Slips settle in sequence as the rail travels (opacity only, in CSS).
+  [].slice.call(document.querySelectorAll('#tics .slip')).forEach(function (el, i) { el.style.setProperty('--k', i); });
+
+  // ------------------------------------------------------------- the tabs --
+  var tabs = [].slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(t, focus) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute('aria-selected', on);
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) t.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (e.key === 'Home') select(tabs[0], true);
+      else if (e.key === 'End') select(tabs[tabs.length - 1], true);
+      else if (d) select(tabs[(i + d + tabs.length) % tabs.length], true);
+    });
+  });
+  select(tabs[0]);
+
+  // ------------------------------------------------------------- the copy --
+  [].slice.call(document.querySelectorAll('[data-copy]')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      var input = document.getElementById(b.getAttribute('data-copy'));
+      var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(input.value).then(done, function () { input.select(); });
+      else { input.select(); try { document.execCommand('copy'); done(); } catch (e) {} }
+    });
+  });
+
+  // ------------------------------------------------------ the status bar --
+  var links = {};
+  [].slice.call(document.querySelectorAll('.status__steps a')).forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      Object.keys(links).forEach(function (id) { links[id].setAttribute('aria-current', id === e.target.id); });
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  ['scan', 'tics', 'rewrite', 'report', 'facts'].forEach(function (id) { io.observe(document.getElementById(id)); });
+})();
+</script>
+</body>
+</html>
