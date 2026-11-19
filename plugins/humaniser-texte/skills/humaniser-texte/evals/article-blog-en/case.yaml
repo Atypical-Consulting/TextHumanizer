@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: article-blog-en
+expected_outcome: |
+  A rewritten blog post in English with informative headings, no em dashes, no buzzwords or
+  "In this article / In conclusion", the three bolded pillars turned into something less templated,
+  and the two dated claims checked: Python 3.13 is no longer the latest version (3.15 was released
+  on 9 October 2026) and Python 3.10 reached end of life in October 2026, flagged with sources
+  rather than kept as true. Followed by a before/after measures table and a short recap.

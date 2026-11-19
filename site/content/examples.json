@@ -1,0 +1,191 @@
+[
+  {
+    "case": "linkedin-post-fr",
+    "format": "linkedin",
+    "lang": "fr",
+    "before": "🚀 Dans un monde en constante évolution, la modernisation des applications legacy n'est plus une option — c'est une nécessité.\n\nCes trois derniers mois, notre équipe a eu le privilège d'accompagner un client dans un projet véritablement transformateur : la migration de son application métier de .NET Framework 4.6 vers .NET 8.\n\n💡 Ce n'est pas qu'une simple mise à jour technique, c'est un véritable tournant stratégique.\n\nVoici les 3 enseignements clés que nous en retirons :\n\n✅ **Anticiper** : Une cartographie précise des dépendances est cruciale pour éviter les mauvaises surprises.\n✅ **Itérer** : Une approche progressive permet de réduire les risques tout en maintenant la continuité de service.\n✅ **Collaborer** : L'implication des équipes métier joue un rôle essentiel dans la réussite du projet.\n\nEn fin de compte, cette migration a permis d'améliorer les performances, de renforcer la sécurité et de réduire les coûts de maintenance.\n\nEt vous, où en êtes-vous dans la modernisation de vos applications ? 👇\n\n#DotNet #Modernisation #TransformationDigitale #Legacy #Innovation",
+    "after": "Trois mois. C'est le temps qu'il nous a fallu pour faire passer l'application métier d'un client de .NET Framework 4.6 à .NET 8.\n\nSi je ne devais garder qu'une leçon : on a cartographié les dépendances avant de toucher au code. Sans cette carte, les mauvaises surprises tombent en plein milieu du projet, au pire moment.\n\nLe reste en découle. On a avancé par petites étapes, ce qui a limité les risques et laissé l'application en service pendant toute la migration.\n\nEt les équipes métier ont été dans la boucle du début à la fin. Sur ce genre de projet, ça pèse plus lourd que n'importe quel choix technique.\n\nCôté résultat, l'application est plus rapide et sa maintenance coûte moins cher. La sécurité y gagne aussi.\n\nSi vous avez encore du .NET Framework en production, qu'est-ce qui vous retient de migrer ?\n\n#dotnet #Legacy #Migration\n",
+    "measures": {
+      "mots": [
+        166,
+        145
+      ],
+      "CV rythme": [
+        0.39,
+        0.55
+      ],
+      "tirets cadratins": [
+        1,
+        0
+      ],
+      "émojis": [
+        6,
+        0
+      ],
+      "formules typiques": [
+        8,
+        0
+      ],
+      "score humain /100": [
+        32,
+        100
+      ]
+    },
+    "phrases_removed": [
+      "ce n'est pas qu'une simple mise à jour technique, c'est",
+      "cruciale",
+      "dans un monde en constante évolution",
+      "en fin de compte",
+      "joue un rôle essentiel",
+      "transformateur",
+      "véritable",
+      "véritablement"
+    ]
+  },
+  {
+    "case": "email-relance-en",
+    "format": "email",
+    "lang": "en",
+    "before": "Subject: Following Up: Unlocking the Full Potential of Your Legacy Systems\n\nDear Sarah,\n\nI hope this email finds you well. I wanted to follow up on my previous message regarding our conversation at the Logistics Tech Summit — it was truly a pleasure connecting with you.\n\nIn today's fast-paced logistics landscape, modernizing legacy systems is not just a technical upgrade; it's a strategic imperative. At Atypical Consulting, we specialize in helping organizations like yours navigate this complex journey seamlessly.\n\nOur approach is:\n- **Pragmatic**: We focus on delivering tangible results.\n- **Incremental**: We minimize disruption to your operations.\n- **Collaborative**: We work hand-in-hand with your teams.\n\nFurthermore, it's worth noting that we recently helped a client reduce their maintenance costs by 40% — a testament to the transformative power of a well-executed migration.\n\nWould you be open to a brief 20-minute call next week to explore how we might help you unlock the full potential of your systems?\n\nLooking forward to hearing from you.\n\nBest regards,\nPhilippe",
+    "after": "Subject: Legacy systems, a quick follow-up\n\nHi Sarah,\n\nI'm following up on my note after we met at the Logistics Tech Summit, in case it got buried.\n\nWe recently helped a client cut their maintenance costs by 40%. The work is done in small steps, so your teams keep shipping while the old systems get replaced.\n\nWould a 20-minute call next week make sense? If now isn't the right time, just tell me.\n\nBest,\nPhilippe\n",
+    "measures": {
+      "mots": [
+        167,
+        75
+      ],
+      "CV rythme": [
+        0.54,
+        0.64
+      ],
+      "tirets cadratins": [
+        2,
+        0
+      ],
+      "émojis": [
+        0,
+        0
+      ],
+      "formules typiques": [
+        13,
+        0
+      ],
+      "score humain /100": [
+        42,
+        100
+      ]
+    },
+    "phrases_removed": [
+      "furthermore",
+      "hope this email finds you",
+      "in today's fast-paced",
+      "it's worth noting",
+      "landscape",
+      "navigate",
+      "not just a technical upgrade; it's",
+      "seamlessly",
+      "strategic imperative",
+      "testament",
+      "transformative",
+      "unlock",
+      "unlocking"
+    ]
+  },
+  {
+    "case": "script-youtube-fr",
+    "format": "youtube",
+    "lang": "fr",
+    "before": "Salut à tous et bienvenue sur la chaîne ! Dans la vidéo d'aujourd'hui, nous allons plonger au cœur d'un sujet fascinant : le développement d'applications iOS assisté par l'intelligence artificielle.\n\nÀ l'ère de l'IA générative, les outils comme Claude Code révolutionnent la façon dont nous concevons nos logiciels. Ce n'est pas simplement un assistant — c'est un véritable partenaire de développement.\n\nDans cette vidéo, nous allons explorer trois aspects essentiels :\n1. La mise en place de l'environnement de travail.\n2. La génération du code de l'application.\n3. Les tests et le déploiement sur l'App Store.\n\nTout d'abord, il convient de noter que je ne suis pas un développeur iOS expérimenté. En outre, j'ai relevé le défi de créer cette application en un seul week-end. Le résultat ? Une application fonctionnelle, élégante et performante.\n\nAlors, sans plus attendre, plongeons ensemble dans cette aventure passionnante !",
+    "after": "Un week-end. C'est le temps qu'il m'a fallu pour coder une app iOS avec Claude Code, alors que je suis loin d'être un développeur iOS expérimenté.\n\nL'app fonctionne. Elle est propre. Et je vous montre tout.\n\nOn commence par installer l'environnement de travail, puis je laisse Claude Code générer le code de l'app, et on finit par les tests et la publication sur l'App Store.\n\nClaude Code, je m'en sers pas comme d'une autocomplétion de luxe. Je lui confie de vrais morceaux du boulot, un peu comme à un collègue.\n\nAllez, on y va.\n",
+    "measures": {
+      "mots": [
+        145,
+        94
+      ],
+      "CV rythme": [
+        0.59,
+        0.91
+      ],
+      "tirets cadratins": [
+        1,
+        0
+      ],
+      "émojis": [
+        0,
+        0
+      ],
+      "formules typiques": [
+        12,
+        0
+      ],
+      "score humain /100": [
+        54,
+        100
+      ]
+    },
+    "phrases_removed": [
+      "dans la vidéo d'aujourd'hui",
+      "en outre",
+      "fascinant",
+      "il convient de noter",
+      "le résultat ?",
+      "passionnante",
+      "plongeons ensemble",
+      "révolutionnent",
+      "sans plus attendre",
+      "tout d'abord",
+      "véritable",
+      "à l'ère de l'"
+    ]
+  },
+  {
+    "case": "article-blog-en",
+    "format": "blog",
+    "lang": "en",
+    "before": "# Unlocking the Power of Python Upgrades: A Comprehensive Guide\n\nIn today's ever-evolving tech landscape, keeping your Python version up to date is not just a best practice — it's a strategic imperative. In this article, we'll explore why upgrading matters, how to plan your migration, and what pitfalls to avoid.\n\n## Why Upgrading Matters\n\nPython 3.13, the latest version of the language, brings a wealth of performance improvements, enhanced error messages, and robust new features. Furthermore, staying current ensures you benefit from the vibrant ecosystem of libraries that are increasingly dropping support for older versions.\n\nIt's worth noting that Python 3.10 will continue to receive security updates until 2027, so teams still on it have plenty of time. However, it's important to remember that procrastination can lead to technical debt.\n\n## Planning Your Migration\n\nA successful migration hinges on three pillars:\n\n- **Assessment**: Inventory your dependencies and identify potential blockers.\n- **Testing**: Leverage your CI pipeline to run your test suite against the new version.\n- **Rollout**: Deploy incrementally to minimize risk and ensure a seamless transition.\n\n## Conclusion\n\nIn conclusion, upgrading Python is a pivotal step in your journey toward a more secure, performant, and maintainable codebase. By following these best practices, you'll be well-equipped to navigate the upgrade process with confidence.",
+    "after": "# Upgrading Python: why now, and how to plan it\n\nPython 3.10 stopped receiving security updates on October 1, 2026. If it still runs in your production, any vulnerability found from now on stays open. Time to plan.\n\n## Why upgrade\n\nThe current release is Python 3.15, out since October 9, 2026, with lazy imports for faster startup, a significantly upgraded experimental JIT compiler and better error messages. You don't have to jump straight to it: 3.11 to 3.14 are still supported, and 3.11 is the next to lose security fixes, in October 2027.\n\nLibraries won't wait for you. They drop old Python versions over time, and staying behind means pinning old releases that no longer get fixes.\n\nEvery release you skip makes the jump bigger.\n\n## Planning the migration\n\nStart with an inventory of your dependencies and check which ones support your target version, because that's where most blockers show up, before you've touched a line of code.\n\nThen add the new version to your CI matrix. Run the full suite. Fix what breaks.\n\nRoll out one service or environment at a time, so a problem stays small and easy to roll back.\n\nNone of this is hard. It just gets harder the longer you wait.\n",
+    "measures": {
+      "mots": [
+        214,
+        207
+      ],
+      "CV rythme": [
+        0.3,
+        0.71
+      ],
+      "tirets cadratins": [
+        1,
+        0
+      ],
+      "émojis": [
+        0,
+        0
+      ],
+      "formules typiques": [
+        16,
+        0
+      ],
+      "score humain /100": [
+        30,
+        94
+      ]
+    },
+    "phrases_removed": [
+      "ever-evolving",
+      "furthermore",
+      "in conclusion",
+      "in this article",
+      "in today's ever",
+      "it's important to remember",
+      "it's worth noting",
+      "landscape",
+      "leverage",
+      "navigate",
+      "pivotal",
+      "robust",
+      "seamless",
+      "strategic imperative",
+      "unlocking",
+      "vibrant"
+    ]
+  }
+]

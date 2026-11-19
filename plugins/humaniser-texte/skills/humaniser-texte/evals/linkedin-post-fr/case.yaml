@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: linkedin-post-fr
+expected_outcome: |
+  Un post LinkedIn en français réécrit, plus court, sans tirets cadratins, sans émojis en tête de puce,
+  sans « Dans un monde en constante évolution » ni « Ce n'est pas X, c'est Y », qui garde les faits
+  (migration .NET Framework 4.6 vers .NET 8, 3 mois, client), suivi d'un bref récap des corrections.

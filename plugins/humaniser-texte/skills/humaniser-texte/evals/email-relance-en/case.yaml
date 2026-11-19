@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: email-relance-en
+expected_outcome: |
+  A shorter, natural follow-up email in English to Sarah, without "I hope this email finds you well",
+  em dashes, the bolded three-item list or buzzwords (unlock, navigate, seamlessly, testament, transformative),
+  keeping the facts (Logistics Tech Summit, 40% maintenance cost reduction, 20-minute call next week),
+  followed by a short recap.

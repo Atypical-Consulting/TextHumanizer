@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: script-youtube-fr
+expected_outcome: |
+  Une intro de vidéo YouTube en français écrite pour l'oral (phrases courtes, langage parlé),
+  avec une accroche directe, sans liste numérotée, sans tiret cadratin ni « plonger au cœur »,
+  « À l'ère de », « il convient de noter », « Tout d'abord / En outre », qui garde les faits
+  (Claude Code, app iOS, un week-end, pas développeur iOS expérimenté), suivie d'un bref récap.
