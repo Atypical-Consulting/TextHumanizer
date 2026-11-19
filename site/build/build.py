@@ -3,11 +3,11 @@
 writes index.html. Every demo string comes from the JSON; every number in the
 peak comes from scan.py run on the exact text shown at that step.
 
-Run from the repo root: python3 scrollcraft/builds/text-humanizer/build.py
+Run from the repo root: python3 site/build/build.py
 """
 import html, json, os, re, sys
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, "plugins/text-humanizer/skills/text-humanizer/scripts"))
 import scan  # noqa: E402
@@ -200,5 +200,5 @@ assert all(v == 0 for v in (tot_after["formules typiques"], tot_after["tirets ca
 for k, v in fill.items():
     src = src.replace("{{" + k + "}}", v)
 assert "{{" not in src, re.findall(r"\{\{\w+\}\}", src)
-open(os.path.join(HERE, "index.html"), "w", encoding="utf-8").write(src)
+open(os.path.join(ROOT, "docs", "index.html"), "w", encoding="utf-8").write(src)
 print("ok", STATES[0]["score"], "->", STATES[10]["score"], tot, tot_after)
