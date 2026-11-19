@@ -29,7 +29,7 @@ Four test texts (LinkedIn FR, follow-up email EN, YouTube script FR, blog post E
 | Before/after measures in the answer | 4 of 4 | 0 of 4 |
 | Indicative score (before → after) | 30-54 → 94-100 | not measured |
 
-Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live in [`plugins/text-humanizer/skills/text-humanizer/evals/`](plugins/text-humanizer/skills/text-humanizer/evals/) and run with `claude plugin eval`.
+Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live next to each skill, the English ones in [`text-humanizer/evals/`](plugins/text-humanizer/skills/text-humanizer/evals/) and the French ones in [`humaniser-texte/evals/`](plugins/text-humanizer/skills/humaniser-texte/evals/), and run with `claude plugin eval`.
 
 ## Install
 
@@ -73,11 +73,12 @@ plugins/text-humanizer/skills/
 │   │   ├── markers-en.md     the same for English
 │   │   └── formats.md        sourced best practices and numeric targets per format
 │   ├── scripts/scan.py       the measuring tool (report or before/after table)
-│   └── evals/                four test cases, 16-17 graders each
+│   └── evals/                the two English test cases, 16-17 graders each
 └── humaniser-texte/          French skill (requests written in French), same content in French
     ├── SKILL.md
     ├── references/           marqueurs-fr.md, markers-en.md, formats.md
-    └── scripts/scan.py       identical copy
+    ├── scripts/scan.py       identical copy
+    └── evals/                the two French test cases
 site/                         brief and real examples for the site
 docs/                         the GitHub Pages site (built output)
 ```
