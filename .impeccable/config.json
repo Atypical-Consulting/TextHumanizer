@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "docs/index.html"
+        ],
+        "createdAt": "2026-11-19T16:41:53.256Z",
+        "reason": "Agent: report and install are full-bleed paper bands; their inset is the .sc-wrap gutter (clamp, min 20px) which the static detector cannot resolve. Verified in screenshots."
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "docs/index.html"
+        ],
+        "createdAt": "2026-11-19T16:41:53.282Z",
+        "reason": "Agent: body overflow-x: clip comes from the scroll-craft engine (docs/scrollcraft.css, not editable) and keeps the pan rail and pinned scenes from causing horizontal scroll."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "docs/index.html"
+        ],
+        "createdAt": "2026-11-19T16:41:53.309Z",
+        "reason": "Agent: the brief pins paper and ink (an editor's marked-up galley proof); the #E9E7E1 paper ground is the committed world."
+      }
+    ]
+  }
+}
