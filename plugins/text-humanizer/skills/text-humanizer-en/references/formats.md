@@ -29,7 +29,7 @@ Targets:
 - A single clear ask, preferably a simple closed question.
 
 Writing:
-- The point of the email in the first two lines. No "I hope this email finds you well" (in French, « J'espère que ce message vous trouve en bonne santé »).
+- The point of the email in the first two lines. No "I hope this email finds you well".
 - Personalize with a real detail (a sentence from the conversation, their context). If the information is missing, leave a clearly marked placeholder in the recap rather than inventing it.
 - No bullet list for three sentences; no brochure adjectives ("pragmatic, agile, collaborative").
 - Offer a simple way out ("if now isn't the right time, just tell me").
@@ -47,7 +47,7 @@ Targets:
 Writing:
 - Do not open with "Hi everyone, welcome back to the channel, today we're going to talk about...": open with the result, the action or the stakes, then give the context.
 - The hook confirms the promise of the title and thumbnail, then extends it (curiosity, stakes).
-- Spoken language: contractions to match the author's tone ("don't", "you're"; in French, « on » rather than « nous », « c'est pas », « y'a »). Keep the author's formal or informal address.
+- Spoken language: contractions to match the author's tone ("don't", "you're"). Keep the author's formal or informal address.
 - No long brand intro before the hook.
 - Natural spoken transitions ("Right.", "And that's where it gets tricky."). Read it aloud in your head: any sentence you cannot say in one breath gets cut.
 - A single call to action, precise, placed after delivering value.

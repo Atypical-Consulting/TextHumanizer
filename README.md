@@ -29,7 +29,7 @@ Four test texts (LinkedIn FR, follow-up email EN, YouTube script FR, blog post E
 | Before/after measures in the answer | 4 of 4 | 0 of 4 |
 | Indicative score (before → after) | 30-54 → 94-100 | not measured |
 
-Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live next to each skill, the English ones in [`text-humanizer/evals/`](plugins/text-humanizer/skills/text-humanizer/evals/) and the French ones in [`humaniser-texte/evals/`](plugins/text-humanizer/skills/humaniser-texte/evals/), and run with `claude plugin eval`.
+Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live next to each skill, the English ones in [`text-humanizer-en/evals/`](plugins/text-humanizer/skills/text-humanizer-en/evals/) and the French ones in [`text-humanizer-fr/evals/`](plugins/text-humanizer/skills/text-humanizer-fr/evals/), and run with `claude plugin eval`.
 
 ## Install
 
@@ -42,22 +42,22 @@ Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live next to ea
 /plugin install text-humanizer@text-humanizer
 ```
 
-Then just paste a text and say it sounds like AI, or invoke it directly. The plugin ships the same skill twice, one per language of your request (the text itself can be English or French in both):
+Then just paste a text and say it sounds like AI, or invoke it directly. The plugin ships one skill per language, and each one only handles texts in its own language:
 
 ```
-/text-humanizer:text-humanizer      requests written in English
-/text-humanizer:humaniser-texte     requests written in French
+/text-humanizer:text-humanizer-en   English texts
+/text-humanizer:text-humanizer-fr   French texts
 ```
 
 ### Claude.ai and other agents
 
-Download either folder, [`skills/text-humanizer`](plugins/text-humanizer/skills/text-humanizer/) (English) or [`skills/humaniser-texte`](plugins/text-humanizer/skills/humaniser-texte/) (French), keep `references/` and `scripts/`, zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory. Both are self-contained.
+Download the folder for your language, [`text-humanizer-en`](plugins/text-humanizer/skills/text-humanizer-en/) or [`text-humanizer-fr`](plugins/text-humanizer/skills/text-humanizer-fr/), keep `references/` and `scripts/`, zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory. Both are self-contained.
 
 ### Using the scanner on its own
 
 ```bash
-python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py text.txt --lang en --format linkedin
-python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py --compare before.txt after.txt --lang fr --format email
+python3 plugins/text-humanizer/skills/text-humanizer-en/scripts/scan.py text.txt --lang en --format linkedin
+python3 plugins/text-humanizer/skills/text-humanizer-fr/scripts/scan.py --compare before.txt after.txt --lang fr --format email
 ```
 
 Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no dependencies. Each skill folder carries an identical copy of `scan.py`; its output labels are in French.
@@ -66,17 +66,16 @@ Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no 
 
 ```
 plugins/text-humanizer/skills/
-├── text-humanizer/           English skill (requests written in English)
+├── text-humanizer-en/        English texts only
 │   ├── SKILL.md              the procedure: measure, fact-check, rewrite, measure, report
 │   ├── references/
-│   │   ├── marqueurs-fr.md   AI markers in French, by family, with fixes
-│   │   ├── markers-en.md     the same for English
+│   │   ├── markers-en.md     AI markers in English, by family, with fixes
 │   │   └── formats.md        sourced best practices and numeric targets per format
 │   ├── scripts/scan.py       the measuring tool (report or before/after table)
 │   └── evals/                the two English test cases, 16-17 graders each
-└── humaniser-texte/          French skill (requests written in French), same content in French
+└── text-humanizer-fr/        French texts only, same procedure written in French
     ├── SKILL.md
-    ├── references/           marqueurs-fr.md, markers-en.md, formats.md
+    ├── references/           marqueurs-fr.md, formats.md
     ├── scripts/scan.py       identical copy
     └── evals/                the two French test cases
 site/                         brief and real examples for the site
@@ -92,7 +91,7 @@ docs/                         the GitHub Pages site (built output)
 
 ## En français
 
-Ce skill réécrit un texte généré par une IA pour qu'il sonne écrit par un humain, en français ou en anglais. Il mesure le texte, vérifie les faits datés, applique les bonnes pratiques du format (post LinkedIn, email, script YouTube, article, description), puis rend le texte réécrit avec un tableau avant/après. Pour une demande rédigée en français, c'est le skill `humaniser-texte` (`/text-humanizer:humaniser-texte`). Installation : voir plus haut.
+Ce skill réécrit un texte généré par une IA pour qu'il sonne écrit par un humain, en français ou en anglais, avec un skill par langue (`text-humanizer-fr` pour le français). Il mesure le texte, vérifie les faits datés, applique les bonnes pratiques du format (post LinkedIn, email, script YouTube, article, description), puis rend le texte réécrit avec un tableau avant/après. Pour une demande rédigée en français, c'est le skill `humaniser-texte` (`/text-humanizer:humaniser-texte`). Installation : voir plus haut.
 
 ## Licence
 

@@ -38,10 +38,10 @@ About 15 % more tokens and 30 to 45 seconds more per text with the skill, mostly
 
 ## Reproduce
 
-From each skill folder (English cases in `text-humanizer`, French cases in `humaniser-texte`), with Claude Code 2.1.269 or later:
+From each skill folder (English cases in `text-humanizer-en`, French cases in `text-humanizer-fr`), with Claude Code 2.1.269 or later:
 
 ```bash
-cd plugins/text-humanizer/skills/text-humanizer   # or .../humaniser-texte
+cd plugins/text-humanizer/skills/text-humanizer-en   # or .../text-humanizer-fr
 claude plugin eval . --allow-tools Write,Edit,Bash,WebSearch,WebFetch
 ```
 

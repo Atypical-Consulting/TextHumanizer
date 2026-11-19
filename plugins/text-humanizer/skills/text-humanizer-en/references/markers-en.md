@@ -1,6 +1,6 @@
 # AI writing markers in English
 
-Same families as the French catalogue. No single marker proves AI authorship; the pile-up does. Fix them all anyway, since each one makes the text weaker.
+No single marker proves AI authorship; the pile-up does. Fix them all anyway, since each one makes the text weaker.
 
 ## 1. Statistical (rhythm and predictability)
 

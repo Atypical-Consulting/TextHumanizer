@@ -9,7 +9,7 @@ import html, json, os, re, sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(ROOT, "plugins/text-humanizer/skills/text-humanizer/scripts"))
+sys.path.insert(0, os.path.join(ROOT, "plugins/text-humanizer/skills/text-humanizer-fr/scripts"))
 import scan  # noqa: E402
 
 EX = {e["case"]: e for e in json.load(open(os.path.join(ROOT, "site/content/examples.json"), encoding="utf-8"))}

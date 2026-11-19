@@ -1,6 +1,6 @@
 ---
-name: humaniser-texte
-description: Réécrit un texte généré par un LLM pour qu'il sonne écrit par un humain. Supprime les tics de l'IA (tirets cadratins, règle de trois, « Ce n'est pas X, c'est Y », « Dans un monde en constante évolution », « crucial », « delve », émojis en tête de puce, rythme plat), applique les bonnes pratiques du format, vérifie les faits datés et mesure l'avant/après. Utilise ce skill pour toute demande rédigée en français (texte en français ou en anglais), dès que l'utilisateur colle un texte et veut le rendre plus naturel, moins ChatGPT, moins robot, plus « lui » ou le réécrire avec sa voix (post LinkedIn, article, email, script YouTube, description, page « À propos », newsletter), ou demande si son texte sonne IA avant de le publier, même sans le mot « humaniser ». Pas pour écrire un texte de zéro, traduire, corriger seulement l'orthographe, changer le registre d'un texte qu'il a écrit lui-même, ni juger si un tiers a utilisé une IA. Pour une demande rédigée en anglais, c'est le skill text-humanizer de ce plugin.
+name: text-humanizer-fr
+description: Réécrit un texte en français généré par un LLM (ChatGPT, Claude, Gemini...) pour qu'il sonne écrit par un humain. Supprime les tics de l'IA (tirets cadratins, règle de trois, « Ce n'est pas X, c'est Y », « Dans un monde en constante évolution », « crucial », émojis en tête de puce, rythme plat), applique les bonnes pratiques du format, vérifie les faits datés et mesure l'avant/après. Utilise ce skill dès que le texte à corriger est en français et que l'utilisateur veut le rendre plus naturel, moins ChatGPT, moins robot, plus « lui » ou le réécrire avec sa voix (post LinkedIn, article, email, script YouTube, description, page « À propos », newsletter), ou demande si son texte sonne IA avant de le publier, même sans le mot « humaniser ». Textes en français uniquement : pour un texte en anglais, c'est text-humanizer-en. Pas pour écrire un texte de zéro, traduire, corriger seulement l'orthographe, changer le registre d'un texte qu'il a écrit lui-même, ni juger si un tiers a utilisé une IA.
 ---
 
 # Humaniser un texte écrit par un LLM
@@ -11,16 +11,18 @@ Un texte généré a un deuxième défaut, moins visible : il affirme avec assur
 
 ## Déroulé
 
-1. **Identifier la langue, le format et le registre.** Post LinkedIn, article, email, script vidéo, description... Lis la section du format dans `references/formats.md` : elle donne les bonnes pratiques et les cibles chiffrées (longueur d'accroche, nombre de mots, hashtags, liens).
+Ce skill ne traite que les textes en français. Si le texte à réécrire est en anglais, dis-le en une ligne et utilise le skill text-humanizer-en ; pour un texte qui mélange les deux, travaille la partie française et dis ce que tu as laissé.
+
+1. **Identifier le format et le registre.** Post LinkedIn, article, email, script vidéo, description... Lis la section du format dans `references/formats.md` : elle donne les bonnes pratiques et les cibles chiffrées (longueur d'accroche, nombre de mots, hashtags, liens).
 
 2. **Mesurer le texte d'origine.** Enregistre-le dans un dossier temporaire à toi (`D=$(mktemp -d)`, jamais un chemin fixe comme `/tmp/x` qu'une autre session pourrait écraser), puis lance :
    ```bash
-   python3 scripts/scan.py "$D/original.txt" --lang <fr|en> --format <linkedin|email|youtube|blog|description>
+   python3 scripts/scan.py "$D/original.txt" --lang fr --format <linkedin|email|youtube|blog|description>
    ```
    Passe toujours `--lang` : la détection automatique se trompe sur les textes courts ou mixtes.
    Le script compte les marqueurs mécaniques (typographie, formules, rythme), vérifie les contraintes du format et donne un score indicatif sur 100. Les tics structurels et de ton demandent ta lecture.
 
-3. **Lire le catalogue de la langue** : `references/marqueurs-fr.md` ou `references/markers-en.md`.
+3. **Lire le catalogue** : `references/marqueurs-fr.md`.
 
 4. **Vérifier les faits datés.** Voir la section dédiée plus bas. Fais-le avant de réécrire : la réécriture peut dépendre de ce que tu trouves.
 
@@ -28,7 +30,7 @@ Un texte généré a un deuxième défaut, moins visible : il affirme avec assur
 
 6. **Mesurer l'avant/après** et corriger ce qui reste :
    ```bash
-   python3 scripts/scan.py --compare "$D/original.txt" "$D/reecrit.txt" --lang <fr|en> --format <format>
+   python3 scripts/scan.py --compare "$D/original.txt" "$D/reecrit.txt" --lang fr --format <format>
    ```
    Vise : zéro tiret cadratin, zéro formule typique, CV rythme ≥ 0,5, toutes les contraintes du format à « ok ». Si une contrainte reste « À REVOIR », corrige ou explique pourquoi c'est voulu.
 
@@ -65,7 +67,7 @@ Repère dans le texte tout ce qui peut avoir changé depuis l'entraînement d'un
 
 **Oser une position.** Si l'auteur a un avis, laisse-le s'exprimer franchement au lieu de l'équilibrer par une nuance bienveillante systématique. Tu ne crées pas d'opinion absente du texte, mais tu retires les précautions qui la diluent.
 
-**Typographie humaine.** Aucun tiret cadratin (—) ni demi-cadratin en incise : virgule, deux-points, parenthèses ou point. Pas de gras sur un mot-clé suivi de deux-points en tête de chaque puce. Émojis : zéro ou quelques-uns, jamais un par puce. Supprime les résidus Markdown (**, ###, ---) si le texte va être collé ailleurs qu'en Markdown, et les paramètres `utm_source=chatgpt.com`. En français, typographie française (espace avant « : ; ! ? », guillemets « »), sauf si l'auteur ne le fait manifestement pas.
+**Typographie humaine.** Aucun tiret cadratin (—) ni demi-cadratin en incise : virgule, deux-points, parenthèses ou point. Pas de gras sur un mot-clé suivi de deux-points en tête de chaque puce. Émojis : zéro ou quelques-uns, jamais un par puce. Supprime les résidus Markdown (**, ###, ---) si le texte va être collé ailleurs qu'en Markdown, et les paramètres `utm_source=chatgpt.com`. Typographie française (espace avant « : ; ! ? », guillemets « »), sauf si l'auteur ne le fait manifestement pas.
 
 **Pas de sur-correction.** Ne remplace pas un tic par un autre (tout en phrases d'un mot, fautes volontaires, familiarités en rafale). Le texte reste professionnel si le contexte l'est.
 

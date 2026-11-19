@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 (2026-11-19)
+
+- Skills renamed by language: `text-humanizer-en` and `text-humanizer-fr` (`/text-humanizer:text-humanizer-en`, `/text-humanizer:text-humanizer-fr`).
+- Each skill now handles only texts in its own language: it keeps only its own marker catalogue, always runs `scan.py` with its language, and hands a text in the other language to the other skill.
+
 ## 1.1.0 (2026-11-19)
 
 - Two skills with the same behaviour, one per language of the request:
