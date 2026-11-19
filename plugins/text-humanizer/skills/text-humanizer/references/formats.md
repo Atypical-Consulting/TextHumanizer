@@ -1,86 +1,86 @@
-# Bonnes pratiques par format
+# Best practices by format
 
-Chaque section donne des cibles chiffrées (vérifiées par `scan.py --format ...`) et les règles d'écriture. Les chiffres viennent d'études d'éditeurs d'outils (sources en bas de section) : ce sont des repères, pas des lois. Si l'auteur a une habitude contraire assumée (posts longs qui marchent pour lui, par exemple), sa pratique l'emporte.
+Each section gives numeric targets (checked by `scan.py --format ...`) and writing rules. The figures come from studies by tool vendors (sources at the end of each section): they are reference points, not laws. If the author has a deliberate habit that goes the other way (long posts that work for them, for example), their practice wins.
 
-## Post LinkedIn / réseaux sociaux
+## LinkedIn post / social media
 
-Cibles :
-- Accroche (première ligne) lisible en 2 secondes et sous ~140-210 caractères, la zone visible avant « voir plus ».
-- Longueur : 1 300 à 2 000 caractères (200-300 mots) pour un post texte classique ; un post très court peut aussi bien marcher. Plafond 3 000 caractères.
-- Hashtags : 3 au plus, en fin de post, spécifiques (pas #Innovation). Ils ont peu d'effet sur la portée.
-- Pas de lien externe dans le corps : il réduit la diffusion. Le mettre en premier commentaire et l'annoncer (« lien en commentaire »).
-- Pas d'émoji dans l'accroche ; zéro à deux dans le reste.
+Targets:
+- Hook (first line) readable in 2 seconds and under ~140-210 characters, the area visible before "see more".
+- Length: 1,300 to 2,000 characters (200-300 words) for a standard text post; a very short post can work just as well. Ceiling of 3,000 characters.
+- Hashtags: 3 at most, at the end of the post, specific (not #Innovation). They have little effect on reach.
+- No external link in the body: it reduces distribution. Put it in the first comment and say so ("link in the comments").
+- No emoji in the hook; zero to two in the rest.
 
-Écriture :
-- L'accroche porte un fait, un chiffre précis, un problème concret, un avant/après ou une prise de position. Jamais « Je suis ravi d'annoncer », « Happy Monday » ou une question générique.
-- Paragraphes de 1 à 3 lignes séparés par une ligne vide, sans tomber dans une phrase par ligne sur tout le post.
-- Première personne. Une opinion assumée vaut mieux qu'un résumé équilibré.
-- Pas de gras sur les hashtags ou mots-clés, pas d'accroche entièrement en gras, pas de gras Unicode (𝗴𝗿𝗮𝘀) qui casse la recherche et l'accessibilité.
-- Fin : l'idée la plus forte, ou une question précise qui appelle une vraie réponse. Pas de « Et vous, qu'en pensez-vous ? 👇 ».
+Writing:
+- The hook carries a fact, a precise figure, a concrete problem, a before/after or a stance. Never "I'm thrilled to announce", "Happy Monday" or a generic question.
+- Paragraphs of 1 to 3 lines separated by a blank line, without sliding into one sentence per line for the whole post.
+- First person. A committed opinion beats a balanced summary.
+- No bold on hashtags or keywords, no all-bold hook, no Unicode bold (𝗯𝗼𝗹𝗱) that breaks search and accessibility.
+- Ending: the strongest idea, or a precise question that invites a real answer. Not "What do you think? 👇".
 
-Sources : guides LinkedIn 2026 de Postory, Ordinal, YouScan, Socialk.it.
+Sources: 2026 LinkedIn guides from Postory, Ordinal, YouScan, Socialk.it.
 
-## Email, message professionnel (dont relance commerciale)
+## Email, professional message (including sales follow-up)
 
-Cibles :
-- Objet : 2 à 7 mots (36-50 caractères), sans deux-points ni guillemets qui déclenchent les filtres anti-spam d'Outlook/Microsoft 365. L'objet doit correspondre au contenu.
-- Premier email de prospection : moins de 80-125 mots ; la meilleure tranche mesurée chez Hunter est 20-39 mots.
-- Relance : 30 à 90 mots, avec un élément nouveau (contexte, ressource, cas client) plutôt que la redite du premier message.
-- Une seule demande claire, de préférence une question fermée simple.
+Targets:
+- Subject: 2 to 7 words (36-50 characters), without colons or quotation marks, which trigger Outlook/Microsoft 365 spam filters. The subject must match the content.
+- First prospecting email: under 80-125 words; the best band measured by Hunter is 20-39 words.
+- Follow-up: 30 to 90 words, with something new (context, a resource, a customer case) rather than a rehash of the first message.
+- A single clear ask, preferably a simple closed question.
 
-Écriture :
-- L'objet de l'email dans les deux premières lignes. Pas de « J'espère que ce message vous trouve en bonne santé » ni « I hope this email finds you well ».
-- Personnaliser par un détail réel (une phrase de l'échange, son contexte). Si l'information manque, laisser un emplacement clairement marqué dans le récap plutôt que d'inventer.
-- Pas de liste à puces pour trois phrases ; pas d'adjectifs de plaquette (« pragmatique, agile, collaboratif »).
-- Offrir une porte de sortie simple (« si ce n'est pas le moment, dites-le-moi »).
-- Formule de fin brève et adaptée à la relation.
+Writing:
+- The point of the email in the first two lines. No "I hope this email finds you well" (in French, « J'espère que ce message vous trouve en bonne santé »).
+- Personalize with a real detail (a sentence from the conversation, their context). If the information is missing, leave a clearly marked placeholder in the recap rather than inventing it.
+- No bullet list for three sentences; no brochure adjectives ("pragmatic, agile, collaborative").
+- Offer a simple way out ("if now isn't the right time, just tell me").
+- A short sign-off suited to the relationship.
 
-Sources : Hunter (34 M d'emails), Saleshandy (30 M), Prospeo (5,5 M), Gong (étude relances).
+Sources: Hunter (34M emails), Saleshandy (30M), Prospeo (5.5M), Gong (follow-up study).
 
-## Script vidéo YouTube
+## YouTube video script
 
-Cibles :
-- L'accroche tombe dans les 5 à 15 premières secondes (environ 15-40 mots) ; l'indicateur « Intro » de YouTube Studio mesure la part d'audience encore là à 30 secondes, et 20 à 40 % des spectateurs partent avant.
-- Phrases courtes : moyenne autour de 8-14 mots. Débit de lecture ~150 mots/minute pour estimer la durée.
-- Aucune liste numérotée, aucun intertitre.
+Targets:
+- The hook lands in the first 5 to 15 seconds (about 15-40 words); YouTube Studio's "Intro" metric measures the share of the audience still there at 30 seconds, and 20 to 40% of viewers leave before that.
+- Short sentences: an average of about 8-14 words. Reading pace ~150 words per minute to estimate the duration.
+- No numbered list, no subheadings.
 
-Écriture :
-- Ne pas ouvrir sur « Salut à tous, bienvenue sur la chaîne, aujourd'hui on va parler de... » : ouvrir sur le résultat, l'action ou l'enjeu, puis donner le contexte.
-- L'accroche confirme la promesse du titre et de la miniature, puis la prolonge (curiosité, enjeu).
-- Langage parlé : « on » plutôt que « nous », contractions selon le ton de l'auteur (« c'est pas », « y'a » ; « don't », « you're »). Garder le tutoiement ou le vouvoiement de l'auteur.
-- Pas de générique de marque long avant l'accroche.
-- Transitions orales naturelles (« Bon. », « Et c'est là que ça coince. »). Lire à voix haute mentalement : toute phrase qu'on ne dit pas d'une traite se coupe.
-- Un seul appel à l'action, précis, placé après avoir apporté de la valeur.
+Writing:
+- Do not open with "Hi everyone, welcome back to the channel, today we're going to talk about...": open with the result, the action or the stakes, then give the context.
+- The hook confirms the promise of the title and thumbnail, then extends it (curiosity, stakes).
+- Spoken language: contractions to match the author's tone ("don't", "you're"; in French, « on » rather than « nous », « c'est pas », « y'a »). Keep the author's formal or informal address.
+- No long brand intro before the hook.
+- Natural spoken transitions ("Right.", "And that's where it gets tricky."). Read it aloud in your head: any sentence you cannot say in one breath gets cut.
+- A single call to action, precise, placed after delivering value.
 
-Sources : vidIQ, documentation YouTube Studio (moment « Intro »), Creatorr, Ali Abdaal.
+Sources: vidIQ, YouTube Studio documentation ("Intro" moment), Creatorr, Ali Abdaal.
 
-## Article, blog
+## Article, blog post
 
-Cibles :
-- Paragraphes de 50 à 70 mots maximum (environ 3-4 phrases), certains d'une seule ligne pour le rythme.
-- Phrases autour de 15-20 mots en moyenne, en variant fortement.
-- Intertitres H2 informatifs : un lecteur qui ne lit que les intertitres doit comprendre l'essentiel.
+Targets:
+- Paragraphs of 50 to 70 words at most (about 3-4 sentences), some just one line long for rhythm.
+- Sentences of about 15-20 words on average, with strong variation.
+- Informative H2 subheadings: a reader who reads only the subheadings should get the gist.
 
-Écriture :
-- Pyramide inversée : la conclusion ou l'idée principale d'abord, les détails ensuite. La première phrase de chaque paragraphe porte son idée.
-- 79 % des lecteurs web survolent la page (Nielsen Norman Group) : rendre le texte scannable par les intertitres et les premières phrases, pas par une avalanche de gras.
-- Pas d'annonce du plan (« Dans cet article, nous allons voir... »), pas de conclusion qui résume.
-- Intertitres en casse de phrase, pas en Title Case ni en questions rhétoriques systématiques.
-- Prose par défaut ; listes seulement pour des éléments réellement parallèles. Gras rare et cohérent.
-- Exemples concrets et chiffres sourcés.
+Writing:
+- Inverted pyramid: the conclusion or main idea first, details after. The first sentence of each paragraph carries its idea.
+- 79% of web readers scan the page (Nielsen Norman Group): make the text scannable through subheadings and first sentences, not through an avalanche of bold.
+- No outline announcement ("In this article, we'll explore..."), no conclusion that sums up.
+- Subheadings in sentence case, not Title Case, and not rhetorical questions every time.
+- Prose by default; lists only for items that are genuinely parallel. Bold rare and consistent.
+- Concrete examples and sourced figures.
 
-Sources : Nielsen Norman Group (lecture web, pyramide inversée), guides de lisibilité (Kontent.ai, Hemingway).
+Sources: Nielsen Norman Group (web reading, inverted pyramid), readability guides (Kontent.ai, Hemingway).
 
-## Description (vidéo, produit, profil)
+## Description (video, product, profile)
 
-Cibles :
-- L'essentiel et le mot-clé principal dans les 100-150 premiers caractères (zone visible avant « plus » et dans les résultats de recherche).
-- Description vidéo : 150 à 300 mots pour une vidéo standard ; chapitres horodatés dès que la vidéo dépasse quelques minutes (le premier à 0:00).
-- 3 à 5 hashtags pertinents au plus.
+Targets:
+- The essentials and the main keyword in the first 100-150 characters (the area visible before "more" and in search results).
+- Video description: 150 to 300 words for a standard video; timestamped chapters as soon as the video runs longer than a few minutes (the first at 0:00).
+- 3 to 5 relevant hashtags at most.
 
-Écriture :
-- Dire ce que la personne y trouve, sans adjectifs creux (« incroyable », « ultime », « complet »).
-- Garder intacts liens et horodatages ; retirer les paramètres `utm_source=chatgpt.com`.
-- Un appel à l'action, pas une rafale (« abonne-toi, like, cloche, commente »).
+Writing:
+- Say what the person will find, without empty adjectives ("incredible", "ultimate", "complete").
+- Keep links and timestamps intact; remove `utm_source=chatgpt.com` parameters.
+- One call to action, not a barrage ("subscribe, like, hit the bell, comment").
 
-Sources : Clipchamp, Sprout Social, WebFX.
+Sources: Clipchamp, Sprout Social, WebFX.

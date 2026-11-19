@@ -9,8 +9,8 @@
     {
       "name": "text-humanizer",
       "source": "./plugins/text-humanizer",
-      "description": "Rewrites LLM-generated text (FR/EN) so it reads human: removes AI tics, applies format best practices (LinkedIn, email, YouTube script, blog, description), fact-checks dated claims and measures before/after.",
-      "version": "1.0.0",
+      "description": "Rewrites LLM-generated text (FR/EN) so it reads human: removes AI tics, applies format best practices (LinkedIn, email, YouTube script, blog, description), fact-checks dated claims and measures before/after. Two skills, same behaviour: text-humanizer for requests written in English, humaniser-texte for requests written in French.",
+      "version": "1.1.0",
       "author": { "name": "Atypical Consulting" },
       "license": "MIT"
     }

@@ -1,6 +1,6 @@
 # TextHumanizer
 
-**A Claude skill that rewrites LLM-generated text so it reads like a person wrote it. French and English.**
+**A Claude skill that rewrites LLM-generated text so it reads like a person wrote it. French and English, with one skill per language of your request.**
 
 [![MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://code.claude.com/docs/en/plugins)
@@ -42,15 +42,16 @@ Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live in [`plugi
 /plugin install text-humanizer@text-humanizer
 ```
 
-Then just paste a text and say it sounds like AI, or invoke it directly:
+Then just paste a text and say it sounds like AI, or invoke it directly. The plugin ships the same skill twice, one per language of your request (the text itself can be English or French in both):
 
 ```
-/text-humanizer:text-humanizer
+/text-humanizer:text-humanizer      requests written in English
+/text-humanizer:humaniser-texte     requests written in French
 ```
 
 ### Claude.ai and other agents
 
-Download the [`skills/text-humanizer`](plugins/text-humanizer/skills/text-humanizer/) folder (keep `references/` and `scripts/`), zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory.
+Download either folder, [`skills/text-humanizer`](plugins/text-humanizer/skills/text-humanizer/) (English) or [`skills/humaniser-texte`](plugins/text-humanizer/skills/humaniser-texte/) (French), keep `references/` and `scripts/`, zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory. Both are self-contained.
 
 ### Using the scanner on its own
 
@@ -59,20 +60,24 @@ python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py text.txt --
 python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py --compare before.txt after.txt --lang fr --format email
 ```
 
-Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no dependencies.
+Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no dependencies. Each skill folder carries an identical copy of `scan.py`; its output labels are in French.
 
 ## What is in here
 
 ```
-plugins/text-humanizer/
-└── skills/text-humanizer/
-    ├── SKILL.md              the procedure: measure, fact-check, rewrite, measure, report
-    ├── references/
-    │   ├── marqueurs-fr.md   AI markers in French, by family, with fixes
-    │   ├── markers-en.md     the same for English
-    │   └── formats.md        sourced best practices and numeric targets per format
-    ├── scripts/scan.py       the measuring tool (report or before/after table)
-    └── evals/                four test cases, 16-17 graders each
+plugins/text-humanizer/skills/
+├── text-humanizer/           English skill (requests written in English)
+│   ├── SKILL.md              the procedure: measure, fact-check, rewrite, measure, report
+│   ├── references/
+│   │   ├── marqueurs-fr.md   AI markers in French, by family, with fixes
+│   │   ├── markers-en.md     the same for English
+│   │   └── formats.md        sourced best practices and numeric targets per format
+│   ├── scripts/scan.py       the measuring tool (report or before/after table)
+│   └── evals/                four test cases, 16-17 graders each
+└── humaniser-texte/          French skill (requests written in French), same content in French
+    ├── SKILL.md
+    ├── references/           marqueurs-fr.md, markers-en.md, formats.md
+    └── scripts/scan.py       identical copy
 site/                         brief and real examples for the site
 docs/                         the GitHub Pages site (built output)
 ```
@@ -86,7 +91,7 @@ docs/                         the GitHub Pages site (built output)
 
 ## En français
 
-Ce skill réécrit un texte généré par une IA pour qu'il sonne écrit par un humain, en français ou en anglais. Il mesure le texte, vérifie les faits datés, applique les bonnes pratiques du format (post LinkedIn, email, script YouTube, article, description), puis rend le texte réécrit avec un tableau avant/après. Installation : voir plus haut.
+Ce skill réécrit un texte généré par une IA pour qu'il sonne écrit par un humain, en français ou en anglais. Il mesure le texte, vérifie les faits datés, applique les bonnes pratiques du format (post LinkedIn, email, script YouTube, article, description), puis rend le texte réécrit avec un tableau avant/après. Pour une demande rédigée en français, c'est le skill `humaniser-texte` (`/text-humanizer:humaniser-texte`). Installation : voir plus haut.
 
 ## Licence
 

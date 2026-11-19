@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (2026-11-19)
+
+- Two skills with the same behaviour, one per language of the request:
+  - `text-humanizer` (English): `SKILL.md` and `references/formats.md` translated into English. Use `/text-humanizer:text-humanizer`.
+  - `humaniser-texte` (French): the original French skill, renamed. Use `/text-humanizer:humaniser-texte`.
+- Each description says which requests it covers, so the two do not compete. The text to fix can be English or French in both.
+- Each skill is self-contained: both marker catalogues and an identical copy of `scan.py`. The eval cases stay in `text-humanizer/evals/`.
+
 ## 1.0.0 (2026-11-17)
 
 First public release.

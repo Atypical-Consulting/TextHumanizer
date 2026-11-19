@@ -1,7 +1,7 @@
 {
   "name": "text-humanizer",
-  "description": "Rewrites LLM-generated text in French or English so it reads like a person wrote it. Removes AI tics (em dashes, rule of three, \"it's not X, it's Y\", generic openers, emoji bullets, flat rhythm), applies the best practices of the target format, fact-checks dated claims with sources and reports before/after measures.",
-  "version": "1.0.0",
+  "description": "Rewrites LLM-generated text in French or English so it reads like a person wrote it. Removes AI tics (em dashes, rule of three, \"it's not X, it's Y\", generic openers, emoji bullets, flat rhythm), applies the best practices of the target format, fact-checks dated claims with sources and reports before/after measures. Two skills, same behaviour: text-humanizer for requests written in English, humaniser-texte for requests written in French.",
+  "version": "1.1.0",
   "author": { "name": "Atypical Consulting", "url": "https://github.com/Atypical-Consulting" },
   "homepage": "https://atypical-consulting.github.io/TextHumanizer/",
   "repository": "https://github.com/Atypical-Consulting/TextHumanizer",

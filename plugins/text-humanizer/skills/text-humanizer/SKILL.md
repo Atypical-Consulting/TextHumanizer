@@ -1,86 +1,87 @@
 ---
 name: text-humanizer
-description: Réécrit un texte généré par un LLM (ChatGPT, Claude, Gemini...) pour qu'il sonne écrit par un humain, en français ou en anglais. Supprime les tics de l'IA (tirets cadratins, règle de trois, « Ce n'est pas X, c'est Y », « Dans un monde en constante évolution », « crucial », « delve », émojis en tête de puce, rythme plat), applique les bonnes pratiques du format, vérifie les faits datés et mesure l'avant/après. Utilise ce skill dès que l'utilisateur colle un texte et veut le rendre plus naturel, moins ChatGPT, moins robot, plus « lui » ou le réécrire avec sa voix (post LinkedIn, article, email, script YouTube, description, page « À propos », newsletter), ou demande si son texte sonne IA avant de le publier, même sans le mot « humaniser ». Pas pour écrire un texte de zéro, traduire, corriger seulement l'orthographe, changer le registre d'un texte qu'il a écrit lui-même, ni juger si un tiers a utilisé une IA.
+description: Rewrites LLM-generated text so it reads like a person wrote it. Removes AI tics (em dashes, rule of three, "It's not X, it's Y", "In today's fast-paced world", "crucial", "delve", emoji bullets, flat rhythm), applies the best practices of the target format, fact-checks dated claims and measures before/after. Use this skill for any request written in English (the text itself may be English or French) as soon as the user pastes a text and wants it more natural, less ChatGPT, less robotic, more like them, or rewritten in their own voice (LinkedIn post, article, email, YouTube script, description, About page, newsletter), or asks whether their text sounds like AI before publishing, even without the word "humanize". Not for writing a text from scratch, translating, fixing spelling only, changing the register of a text they wrote themselves, or judging whether someone else used AI. For requests written in French, the humaniser-texte skill of this plugin applies.
 ---
 
-# Humaniser un texte écrit par un LLM
+# Humanize a text written by an LLM
 
-Le but n'est pas de « tromper un détecteur », c'est d'obtenir un texte que le lecteur a envie de lire : précis, juste, rythmé, avec une voix. Les tics de l'IA sont surtout des symptômes d'une écriture molle (formules creuses, structure prévisible, enthousiasme générique). Corriger le fond corrige les marqueurs ; maquiller les marqueurs sans toucher au fond produit un texte tout aussi plat.
+The goal is not to "fool a detector". It is to get a text the reader wants to read: precise, accurate, with rhythm and a voice. AI tics are mostly symptoms of soft writing (empty phrases, predictable structure, generic enthusiasm). Fixing the substance fixes the markers; masking the markers without touching the substance gives a text that is just as flat.
 
-Un texte généré a un deuxième défaut, moins visible : il affirme avec assurance des faits qui peuvent être faux ou périmés (une version de logiciel, une date, un chiffre). Un texte humanisé qui garde une erreur factuelle reste un mauvais texte, et c'est l'auteur qui en paiera le prix une fois publié.
+A generated text has a second, less visible flaw: it confidently states facts that may be wrong or out of date (a software version, a date, a figure). A humanized text that keeps a factual error is still a bad text, and the author is the one who pays for it once it is published.
 
-## Déroulé
+## Steps
 
-1. **Identifier la langue, le format et le registre.** Post LinkedIn, article, email, script vidéo, description... Lis la section du format dans `references/formats.md` : elle donne les bonnes pratiques et les cibles chiffrées (longueur d'accroche, nombre de mots, hashtags, liens).
+1. **Identify the language, the format and the register.** LinkedIn post, article, email, video script, description... Read the format's section in `references/formats.md`: it gives the best practices and the numeric targets (hook length, word count, hashtags, links).
 
-2. **Mesurer le texte d'origine.** Enregistre-le dans un dossier temporaire à toi (`D=$(mktemp -d)`, jamais un chemin fixe comme `/tmp/x` qu'une autre session pourrait écraser), puis lance :
+2. **Measure the original text.** Save it in a temporary folder of your own (`D=$(mktemp -d)`, never a fixed path like `/tmp/x` that another session could overwrite), then run:
    ```bash
    python3 scripts/scan.py "$D/original.txt" --lang <fr|en> --format <linkedin|email|youtube|blog|description>
    ```
-   Passe toujours `--lang` : la détection automatique se trompe sur les textes courts ou mixtes.
-   Le script compte les marqueurs mécaniques (typographie, formules, rythme), vérifie les contraintes du format et donne un score indicatif sur 100. Les tics structurels et de ton demandent ta lecture.
+   Always pass `--lang`: auto-detection gets short or mixed texts wrong.
+   The script counts mechanical markers (typography, stock phrases, rhythm), checks the format's constraints and gives an indicative score out of 100. Structural and tone tics need your reading.
+   `scan.py` prints its labels in French (`CV rythme` is the sentence-length coefficient of variation, `tirets cadratins` em dashes, `formules typiques` typical phrases, `À REVOIR` needs work, `score humain /100` human score). When you answer in English, translate them in the before/after table.
 
-3. **Lire le catalogue de la langue** : `references/marqueurs-fr.md` ou `references/markers-en.md`.
+3. **Read the catalogue for the text's language**: `references/markers-en.md` for English, `references/marqueurs-fr.md` for French. The English examples in this file have French equivalents in `marqueurs-fr.md`; use those when the text is in French.
 
-4. **Vérifier les faits datés.** Voir la section dédiée plus bas. Fais-le avant de réécrire : la réécriture peut dépendre de ce que tu trouves.
+4. **Check dated facts.** See the dedicated section below. Do it before rewriting: the rewrite may depend on what you find.
 
-5. **Réécrire** selon les principes ci-dessous et les bonnes pratiques du format. Garde les faits, chiffres, noms, liens et l'intention. N'invente ni anecdote, ni chiffre, ni citation, ni détail « pour faire vrai », ni cadrage sur ce qui s'est dit ou pas dit avec le destinataire (« comme je n'ai pas eu le temps de le mentionner », « vous m'aviez parlé de... ») si l'utilisateur ne l'a pas dit. Ces ajouts sonnent humains, mais l'auteur devra assumer une affirmation fausse.
+5. **Rewrite** following the principles below and the format's best practices. Keep the facts, figures, names, links and intent. Do not invent an anecdote, a figure, a quote, a detail "to make it feel real", or framing about what was or was not said with the recipient ("as I didn't get to mention", "you told me about...") if the user did not say it. These additions sound human, but the author will have to stand behind a false claim.
 
-6. **Mesurer l'avant/après** et corriger ce qui reste :
+6. **Measure before/after** and fix what is left:
    ```bash
-   python3 scripts/scan.py --compare "$D/original.txt" "$D/reecrit.txt" --lang <fr|en> --format <format>
+   python3 scripts/scan.py --compare "$D/original.txt" "$D/rewritten.txt" --lang <fr|en> --format <format>
    ```
-   Vise : zéro tiret cadratin, zéro formule typique, CV rythme ≥ 0,5, toutes les contraintes du format à « ok ». Si une contrainte reste « À REVOIR », corrige ou explique pourquoi c'est voulu.
+   Aim for: zero em dashes, zero typical phrases, rhythm CV ≥ 0.5, every format constraint at "ok". If a constraint stays at "À REVOIR" (needs work), fix it or explain why it is intentional.
 
-7. **Rendre le résultat** au format décrit plus bas.
+7. **Deliver the result** in the format described below.
 
-## Vérifier les faits datés
+## Check dated facts
 
-Repère dans le texte tout ce qui peut avoir changé depuis l'entraînement d'un modèle : versions de logiciels et statut de support, dates de sortie, prix, statistiques, intitulés de postes, lois et règlements, « le plus récent », « actuellement », « la dernière version ». Le texte d'origine a été écrit par un LLM, souvent avec des connaissances périmées, et ta propre mémoire peut l'être aussi.
+Spot anything in the text that may have changed since a model was trained: software versions and support status, release dates, prices, statistics, job titles, laws and regulations, "the latest", "currently", "the most recent version". The original text was written by an LLM, often with outdated knowledge, and your own memory may be outdated too.
 
-- Si un outil de recherche web est disponible, vérifie chaque fait daté par une recherche, de préférence sur une source primaire (éditeur, documentation officielle, organisme public). Une ou deux recherches par fait suffisent.
-- Sans outil de recherche, ne présente pas ta mémoire comme vérifiée : signale le fait comme « à vérifier » avec ce que tu crois savoir et la date de tes connaissances.
-- Distingue deux cas :
-  - **Un fait qui décrit le travail ou le choix de l'auteur** (« on a migré vers .NET 8 », « on cible Python 3.13 ») : c'est peut-être lui qui a raison. Garde-le dans le texte et signale le problème dans « Faits à vérifier », avec la source et une formulation de remplacement prête à l'emploi.
-  - **Une affirmation générale sur le monde qui est fausse** (« 3.13 est la dernière version », « 3.10 est supporté jusqu'en 2027 ») : ne la laisse pas dans le texte comme vraie, surtout si elle pousse le lecteur à une mauvaise décision. Corrige-la ou retire-la, et montre dans « Faits à vérifier » ce que disait l'original, la source et ta correction.
-- Ce que tu ajoutes toi-même pour corriger (une date de fin de support, un numéro de version) doit être sourcé comme le reste ; si tu ne l'as pas vérifié, ne l'écris pas ou marque-le « à vérifier ».
-- Pense aux conséquences pour le lecteur : annoncer une migration vers une version qui n'est plus supportée, ou citer « la dernière version » alors qu'une autre vient de sortir, se fera relever en commentaire.
-- Ne signale que ce qui est daté et vérifiable. Pas besoin de sourcer « le code legacy coûte cher à maintenir ».
+- If a web search tool is available, check each dated fact with a search, preferably against a primary source (vendor, official documentation, public body). One or two searches per fact are enough.
+- Without a search tool, do not present your memory as verified: flag the fact as "to check", with what you believe and the date of your knowledge.
+- Tell two cases apart:
+  - **A fact that describes the author's own work or choice** ("we migrated to .NET 8", "we target Python 3.13"): the author may be right. Keep it in the text and flag the issue under "Facts to check", with the source and a ready-to-use replacement wording.
+  - **A general claim about the world that is wrong** ("3.13 is the latest version", "3.10 is supported until 2027"): do not leave it in the text as true, especially if it would push the reader toward a bad decision. Correct it or remove it, and show under "Facts to check" what the original said, the source and your correction.
+- Whatever you add yourself to correct something (an end-of-support date, a version number) must be sourced like the rest; if you have not checked it, do not write it, or mark it "to check".
+- Think about the consequences for the reader: announcing a migration to a version that is no longer supported, or citing "the latest version" when another one just came out, will get called out in the comments.
+- Only flag what is dated and verifiable. No need to source "legacy code is expensive to maintain".
 
-## Principes de réécriture
+## Rewriting principles
 
-**Couper avant de reformuler.** Une bonne part d'un texte IA est du remplissage : ouverture universelle, phrase qui annonce la suite, conclusion qui résume, nuance de politesse (« il est important de rappeler que »). Supprime d'abord. Un texte humanisé est souvent 20 à 40 % plus court.
+**Cut before rephrasing.** A good share of an AI text is filler: a universal opener, a sentence announcing what comes next, a conclusion that sums up, a polite hedge ("it's important to remember that"). Delete first. A humanized text is often 20 to 40% shorter.
 
-**Entrer directement dans le sujet.** La première phrase porte une idée, un fait ou une scène, jamais un décor (« À l'ère du numérique... »).
+**Get straight into the subject.** The first sentence carries an idea, a fact or a scene, never a backdrop ("In the digital age...").
 
-**Varier le rythme pour de vrai.** Alterne des phrases très courtes (trois mots, parfois un seul) avec des phrases plus longues qui déroulent une idée. Les paragraphes aussi ont des tailles inégales. Un rythme uniforme se sent même quand le vocabulaire est bon.
+**Really vary the rhythm.** Alternate very short sentences (three words, sometimes one) with longer ones that develop an idea. Paragraphs have uneven sizes too. A uniform rhythm shows even when the vocabulary is good.
 
-**Concret plutôt qu'abstrait.** Remplace « optimiser l'efficacité opérationnelle » par ce qui se passe réellement, si le texte d'origine le dit. S'il ne le dit pas, garde l'idée simple et propose dans le récap le détail concret que l'auteur pourrait ajouter.
+**Concrete rather than abstract.** Replace "optimize operational efficiency" with what actually happens, if the original text says it. If it does not, keep the idea simple and suggest in the recap the concrete detail the author could add.
 
-**Casser les patrons binaires et ternaires.** Pas de « Ce n'est pas X, c'est Y » ni de « Non seulement... mais aussi » par réflexe. Les énumérations ont le nombre d'éléments qu'il faut. Quand l'original déroule trois points en « d'abord / ensuite / enfin » ou finit sur trois bénéfices alignés, ne recopie pas ce squelette en prose : regroupe, hiérarchise (un point principal, les autres en appui) ou laisse tomber le plus faible.
+**Break binary and ternary patterns.** No "It's not X, it's Y" or "Not only... but also" by reflex. Lists have the number of items they need. When the original runs three points as "first / then / finally" or ends on three lined-up benefits, do not copy that skeleton into prose: group, rank (one main point, the others in support) or drop the weakest.
 
-**Connecteurs : en enlever la plupart.** « Tout d'abord / En outre / Par ailleurs / En conclusion » se suppriment presque toujours. L'enchaînement doit se lire dans les idées.
+**Connectors: remove most of them.** "Firstly / Furthermore / Moreover / In conclusion" can almost always go. The flow should come from the ideas.
 
-**Mots simples.** « Utiliser » plutôt que « tirer parti de », « important » ou rien plutôt que « crucial ». Supprime les adjectifs d'enthousiasme et les paires redondantes.
+**Plain words.** "Use" rather than "leverage", "important" or nothing rather than "crucial". Delete enthusiasm adjectives and redundant pairs.
 
-**Oser une position.** Si l'auteur a un avis, laisse-le s'exprimer franchement au lieu de l'équilibrer par une nuance bienveillante systématique. Tu ne crées pas d'opinion absente du texte, mais tu retires les précautions qui la diluent.
+**Dare to take a position.** If the author has a view, let it come through plainly instead of balancing it with a systematic polite caveat. You do not create an opinion the text does not hold, but you remove the hedges that dilute it.
 
-**Typographie humaine.** Aucun tiret cadratin (—) ni demi-cadratin en incise : virgule, deux-points, parenthèses ou point. Pas de gras sur un mot-clé suivi de deux-points en tête de chaque puce. Émojis : zéro ou quelques-uns, jamais un par puce. Supprime les résidus Markdown (**, ###, ---) si le texte va être collé ailleurs qu'en Markdown, et les paramètres `utm_source=chatgpt.com`. En français, typographie française (espace avant « : ; ! ? », guillemets « »), sauf si l'auteur ne le fait manifestement pas.
+**Human typography.** No em dash (—) or en dash used as a parenthetical: comma, colon, parentheses or a full stop. No bold keyword followed by a colon at the start of every bullet. Emojis: none or a few, never one per bullet. Remove Markdown residue (**, ###, ---) if the text will be pasted somewhere other than Markdown, and `utm_source=chatgpt.com` parameters. English typography for English texts (no space before : ; ! ?, quotes used consistently); French typography for French texts (a space before : ; ! ?, guillemets « »), unless the author clearly does not follow it.
 
-**Pas de sur-correction.** Ne remplace pas un tic par un autre (tout en phrases d'un mot, fautes volontaires, familiarités en rafale). Le texte reste professionnel si le contexte l'est.
+**No over-correction.** Do not replace one tic with another (all one-word sentences, deliberate mistakes, a barrage of casual phrases). The text stays professional if the context is.
 
-## Voix de l'auteur
+## The author's voice
 
-Si l'utilisateur fournit des exemples de ses propres textes, ou si un skill de style d'écriture est disponible, imite cette voix (longueur de phrase, tutoiement, humour, expressions récurrentes) : c'est le meilleur moyen d'obtenir un texte qui sonne vraiment humain. Sans exemple, vise une voix neutre-directe adaptée au format, et propose en une ligne d'utiliser ses textes passés comme référence la prochaine fois.
+If the user provides samples of their own writing, or if a writing-style skill is available, imitate that voice (sentence length, formal or informal address, humour, recurring expressions): it is the best way to get a text that really sounds human. Without samples, aim for a neutral, direct voice suited to the format, and suggest in one line using their past texts as a reference next time.
 
-## Format de la réponse
+## Response format
 
-Dans cet ordre :
+In this order (the commentary in English; the rewritten text stays in the language of the original):
 
-1. **Le texte réécrit**, prêt à copier, dans un bloc de citation (ou un bloc de code si la mise en forme doit être préservée).
-2. **Mesures**, un petit tableau avant/après issu de `scan.py --compare`, limité aux lignes qui ont bougé ou qui comptent pour ce format (mots, mots/phrase, CV rythme, tirets, émojis, formules typiques, contraintes du format, score). Six à dix lignes suffisent.
-3. **Ce qui a changé** : 3 à 5 puces courtes sur les principaux tics corrigés et les choix liés au format.
-4. **Faits à vérifier** (seulement s'il y en a) : chaque fait daté problématique, ce que dit la source (avec le lien), et une formulation de remplacement.
-5. **À ajouter si tu l'as** (facultatif, une ou deux lignes) : le détail concret ou personnel qui renforcerait le texte, sans l'inventer.
+1. **The rewritten text**, ready to copy, in a blockquote (or a code block if the formatting must be preserved).
+2. **Measures**, a small before/after table from `scan.py --compare`, limited to the rows that moved or that matter for this format (words, words/sentence, rhythm CV, dashes, emojis, typical phrases, format constraints, score), with the labels translated into English. Six to ten rows are enough.
+3. **What changed**: 3 to 5 short bullets on the main tics fixed and the format-related choices.
+4. **Facts to check** (only if there are any): each problematic dated fact, what the source says (with the link), and a replacement wording.
+5. **Worth adding if you have it** (optional, one or two lines): the concrete or personal detail that would strengthen the text, without inventing it.
 
-Si l'utilisateur demande seulement un diagnostic (« est-ce que ça sonne IA ? »), donne les mesures et les marqueurs trouvés, puis propose la réécriture au lieu de la faire.
+If the user only asks for a diagnosis ("does this sound like AI?"), give the measures and the markers found, then offer the rewrite instead of doing it.
