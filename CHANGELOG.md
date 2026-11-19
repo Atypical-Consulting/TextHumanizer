@@ -4,7 +4,7 @@
 
 First public release.
 
-- Skill `humaniser-texte`: measure, fact-check, rewrite, measure, report. French and English.
+- Skill `text-humanizer`: measure, fact-check, rewrite, measure, report. French and English.
 - `scan.py`: report and `--compare` modes, format checks for LinkedIn, email, YouTube script, blog and description, indicative score out of 100.
 - References: AI markers catalogue in French and English, sourced best practices per format.
 - Four eval cases with 65 graders in total, runnable with `claude plugin eval`.

@@ -1,4 +1,4 @@
-# humaniser-texte
+# TextHumanizer
 
 **A Claude skill that rewrites LLM-generated text so it reads like a person wrote it. French and English.**
 
@@ -29,7 +29,7 @@ Four test texts (LinkedIn FR, follow-up email EN, YouTube script FR, blog post E
 | Before/after measures in the answer | 4 of 4 | 0 of 4 |
 | Indicative score (before → after) | 30-54 → 94-100 | not measured |
 
-Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live in [`plugins/humaniser-texte/skills/humaniser-texte/evals/`](plugins/humaniser-texte/skills/humaniser-texte/evals/) and run with `claude plugin eval`.
+Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live in [`plugins/text-humanizer/skills/text-humanizer/evals/`](plugins/text-humanizer/skills/text-humanizer/evals/) and run with `claude plugin eval`.
 
 ## Install
 
@@ -39,24 +39,24 @@ Details and method: [BENCHMARK.md](BENCHMARK.md). The test cases live in [`plugi
 /plugin marketplace add Atypical-Consulting/TextHumanizer
 ```
 ```bash
-/plugin install humaniser-texte@humaniser-texte
+/plugin install text-humanizer@text-humanizer
 ```
 
 Then just paste a text and say it sounds like AI, or invoke it directly:
 
 ```
-/humaniser-texte:humaniser-texte
+/text-humanizer:text-humanizer
 ```
 
 ### Claude.ai and other agents
 
-Download the [`skills/humaniser-texte`](plugins/humaniser-texte/skills/humaniser-texte/) folder (keep `references/` and `scripts/`), zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory.
+Download the [`skills/text-humanizer`](plugins/text-humanizer/skills/text-humanizer/) folder (keep `references/` and `scripts/`), zip it and upload it as a skill in Claude.ai, or place it in your agent's skill directory.
 
 ### Using the scanner on its own
 
 ```bash
-python3 plugins/humaniser-texte/skills/humaniser-texte/scripts/scan.py text.txt --lang en --format linkedin
-python3 plugins/humaniser-texte/skills/humaniser-texte/scripts/scan.py --compare before.txt after.txt --lang fr --format email
+python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py text.txt --lang en --format linkedin
+python3 plugins/text-humanizer/skills/text-humanizer/scripts/scan.py --compare before.txt after.txt --lang fr --format email
 ```
 
 Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no dependencies.
@@ -64,8 +64,8 @@ Formats: `linkedin`, `email`, `youtube`, `blog`, `description`. Python 3.9+, no 
 ## What is in here
 
 ```
-plugins/humaniser-texte/
-└── skills/humaniser-texte/
+plugins/text-humanizer/
+└── skills/text-humanizer/
     ├── SKILL.md              the procedure: measure, fact-check, rewrite, measure, report
     ├── references/
     │   ├── marqueurs-fr.md   AI markers in French, by family, with fixes

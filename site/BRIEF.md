@@ -1,10 +1,10 @@
-# BRIEF: humaniser-texte site
+# BRIEF: text-humanizer site
 
 **Self-authored under explicit creative delegation.** Philippe Matray (Atypical Consulting) asked for a GitHub Pages site built with scroll-craft and left the creative questions without preference. The answers below are authored decisions, not user quotes. Evidence (real numbers, real texts) is marked as such; everything else is an assumption to revisit.
 
 ## What this is and who it is for
 
-A landing page for `humaniser-texte`, an open-source Claude skill and Claude Code plugin that rewrites AI-generated text so it reads human, in French and English. Audience: developers, consultants and creators who use Claude Code or Claude.ai and publish on LinkedIn, by email, on YouTube or on a blog. They are tired of posts that open with "In today's fast-paced world".
+A landing page for `text-humanizer`, an open-source Claude skill and Claude Code plugin that rewrites AI-generated text so it reads human, in French and English. Audience: developers, consultants and creators who use Claude Code or Claude.ai and publish on LinkedIn, by email, on YouTube or on a blog. They are tired of posts that open with "In today's fast-paced world".
 
 - **What the visitor must believe by the end:** this skill fixes the writing, not just the symptoms, and it proves it with numbers.
 - **The one action:** install the plugin. One label everywhere: **Install the plugin**. It reveals the two commands with a copy button.

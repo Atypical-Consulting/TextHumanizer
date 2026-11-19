@@ -41,7 +41,7 @@ About 15 % more tokens and 30 to 45 seconds more per text with the skill, mostly
 From the skill folder, with Claude Code 2.1.269 or later:
 
 ```bash
-cd plugins/humaniser-texte/skills/humaniser-texte
+cd plugins/text-humanizer/skills/text-humanizer
 claude plugin eval . --allow-tools Write,Edit,Bash,WebSearch,WebFetch
 ```
 

@@ -1,5 +1,5 @@
 ---
-name: humaniser-texte
+name: text-humanizer
 description: Réécrit un texte généré par un LLM (ChatGPT, Claude, Gemini...) pour qu'il sonne écrit par un humain, en français ou en anglais. Supprime les tics de l'IA (tirets cadratins, règle de trois, « Ce n'est pas X, c'est Y », « Dans un monde en constante évolution », « crucial », « delve », émojis en tête de puce, rythme plat), applique les bonnes pratiques du format, vérifie les faits datés et mesure l'avant/après. Utilise ce skill dès que l'utilisateur colle un texte et veut le rendre plus naturel, moins ChatGPT, moins robot, plus « lui » ou le réécrire avec sa voix (post LinkedIn, article, email, script YouTube, description, page « À propos », newsletter), ou demande si son texte sonne IA avant de le publier, même sans le mot « humaniser ». Pas pour écrire un texte de zéro, traduire, corriger seulement l'orthographe, changer le registre d'un texte qu'il a écrit lui-même, ni juger si un tiers a utilisé une IA.
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "humaniser-texte",
+  "name": "text-humanizer",
   "description": "Atypical Consulting skills for writing that reads like a person wrote it.",
   "owner": {
     "name": "Atypical Consulting",
@@ -7,8 +7,8 @@
   },
   "plugins": [
     {
-      "name": "humaniser-texte",
-      "source": "./plugins/humaniser-texte",
+      "name": "text-humanizer",
+      "source": "./plugins/text-humanizer",
       "description": "Rewrites LLM-generated text (FR/EN) so it reads human: removes AI tics, applies format best practices (LinkedIn, email, YouTube script, blog, description), fact-checks dated claims and measures before/after.",
       "version": "1.0.0",
       "author": { "name": "Atypical Consulting" },
